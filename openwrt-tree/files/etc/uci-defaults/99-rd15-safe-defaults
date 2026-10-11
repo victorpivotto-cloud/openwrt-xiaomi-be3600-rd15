@@ -1,0 +1,27 @@
+#!/bin/sh
+# Xiaomi RD15 first boot / factory reset: SAFE defaults. The box may be wired
+# to the home LAN when this runs (reset button held, reflash), so it must
+# never become a DHCP/RA/DNS server there. It comes up as a bridge-only AP on
+# the bench address 192.168.31.1/24, Wi-Fi off (OpenWrt default), management
+# bound to that IPv4 only, SSH by key only.
+[ "$(cat /tmp/sysinfo/board_name 2>/dev/null)" = "xiaomi,rd15" ] || exit 0
+uci -q batch <<UCI
+set network.lan.ipaddr='192.168.31.1/24'
+set network.lan.ipv6='0'
+delete network.lan.ip6assign
+set dhcp.lan.ignore='1'
+set dhcp.lan.dhcpv4='disabled'
+set dhcp.lan.dhcpv6='disabled'
+set dhcp.lan.ra='disabled'
+set dhcp.lan.ndp='disabled'
+set uhttpd.main.listen_http='192.168.31.1:80'
+delete uhttpd.main.listen_https
+set uhttpd.main.redirect_https='0'
+set dropbear.@dropbear[0].Interface='lan'
+set dropbear.@dropbear[0].PasswordAuth='off'
+set dropbear.@dropbear[0].RootPasswordAuth='off'
+commit
+UCI
+/etc/init.d/dnsmasq disable
+/etc/init.d/odhcpd disable
+exit 0

@@ -1,0 +1,33 @@
+Subject: wifi: ath12k: shrink datapath rings for 256 MiB boards
+
+Halve or quarter several REO/RXDMA ring sizes for the Xiaomi RD15.
+DP_RXDMA_REFILL_RING_SIZE is deliberately left at 2048: ath12k passes it
+as the RXDMA buffer size in the HTT RX filter setup, and reducing it
+produced WARNINGs in ath12k_wifi7_hal_reo_shared_qaddr_cache_clear.
+
+Board-specific tuning; not proposed upstream in this form.
+---
+--- a/drivers/net/wireless/ath/ath12k/dp.h	2026-10-11 10:06:00.237666652 -0300
++++ b/drivers/net/wireless/ath/ath12k/dp.h	2026-10-11 10:06:00.237705342 -0300
+@@ -198,14 +198,17 @@
+ #define DP_TCL_CMD_RING_SIZE		32
+ #define DP_TCL_STATUS_RING_SIZE		32
+ #define DP_REO_DST_RING_MAX		8
+-#define DP_REO_DST_RING_SIZE		2048
++#define DP_REO_DST_RING_SIZE		1024
+ #define DP_REO_REINJECT_RING_SIZE	32
+ #define DP_RX_RELEASE_RING_SIZE		1024
+ #define DP_REO_EXCEPTION_RING_SIZE	128
+ #define DP_REO_CMD_RING_SIZE		256
+-#define DP_REO_STATUS_RING_SIZE		2048
+-#define DP_RXDMA_BUF_RING_SIZE		4096
+-#define DP_RX_MAC_BUF_RING_SIZE		2048
++#define DP_REO_STATUS_RING_SIZE		512
++#define DP_RXDMA_BUF_RING_SIZE		1024 /* RD15: 256 MiB RAM */
++#define DP_RX_MAC_BUF_RING_SIZE		1024
++/* Not a ring size: ath12k passes it as the RXDMA buffer size in the
++ * HTT rx filter setup, so it must stay equal to DP_RX_BUFFER_SIZE.
++ */
+ #define DP_RXDMA_REFILL_RING_SIZE	2048
+ #define DP_RXDMA_ERR_DST_RING_SIZE	1024
+ #define DP_RXDMA_MON_STATUS_RING_SIZE	1024

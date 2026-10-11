@@ -1,0 +1,19 @@
+#!/bin/sh /etc/rc.common
+# Mark the running slot good once the LAN is up (Xiaomi RD15 only).
+START=99
+
+start() {
+	[ "$(cat /tmp/sysinfo/board_name 2>/dev/null)" = "xiaomi,rd15" ] || return 0
+	(
+		for _ in $(seq 1 24); do
+			ubus call network.interface.lan status 2>/dev/null |
+				grep -q '"up": true' && break
+			sleep 5
+		done
+		if ubus call network.interface.lan status 2>/dev/null | grep -q '"up": true'; then
+			/usr/sbin/rd15-slot mark-good 2>&1 | logger -t rd15-slot
+		else
+			logger -p daemon.err -t rd15-slot "LAN not up after 120 s; slot NOT marked good"
+		fi
+	) &
+}

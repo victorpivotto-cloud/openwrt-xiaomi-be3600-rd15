@@ -1,0 +1,12 @@
+# RD15 lab: when running from an initramfs (RAM test over TFTP) the root
+# filesystem itself eats ~38 MiB of the 256 MiB board, so keep ath12k out of
+# the automatic module load; modules stay in /root/ath12k-modules.d.
+rd15_lab_noath12k() {
+	grep -q ' /overlay ' /proc/mounts && return 0
+	[ "$(awk '$2 == "/" {print $3; exit}' /proc/mounts)" = "squashfs" ] && return 0
+	mkdir -p /root/ath12k-modules.d
+	for f in /etc/modules.d/*ath12k*; do
+		[ -e "$f" ] && mv "$f" /root/ath12k-modules.d/
+	done
+}
+boot_hook_add preinit_main rd15_lab_noath12k

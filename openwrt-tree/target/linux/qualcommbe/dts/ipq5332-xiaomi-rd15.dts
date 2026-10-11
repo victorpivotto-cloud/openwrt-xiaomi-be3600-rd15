@@ -1,0 +1,427 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+/*
+ * Xiaomi BE3600 2.5G (RD15)
+ *
+ * IPQ5332 / AP-MI04.1-C2 (same reference board as GL.iNet GL-BE3600)
+ * - 256 MiB DDR (U-Boot fixes /memory to 0x40000000+0x10000000); the
+ *   reserved map below is the stock Xiaomi 1.0.87 one (Q6 256M profile).
+ * - PPE port1 <- PCS0 <- QCA8081 2.5G PHY at MDIO 0x0c (the 2.5G port)
+ *   PPE port2 <- PCS1 <- 2500base-x fixed link to a Motorcomm YT9215S
+ *   switch with the three 1G ports (initialised by stock U-Boot).
+ * - SPI NAND GD5F1GM7REYIG 128 MiB on QPIC, host ECC 4 bit / 512 B as
+ *   stock; partitions from SMEM (rootfs = mtd slot 0, rootfs_1 = slot 1).
+ * - Wi-Fi: integrated 2.4G (stock board_id 0x13) + QCN6432 5G (0x60).
+ *
+ * Facts derived from the stock 1.0.87 DTB and a running unit.
+ */
+
+/dts-v1/;
+
+#include <arm64/qcom/ipq5332.dtsi>
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/clock/qcom,ipq5332-nsscc.h>
+
+/ {
+	#address-cells = <0x2>;
+	#size-cells = <0x2>;
+	model = "Xiaomi BE3600 2.5G (RD15)";
+	compatible = "xiaomi,rd15", "qcom,ipq5332";
+
+	aliases {
+		serial0 = &blsp1_uart0;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+		/* Stock U-Boot passes "ubi.mtd=rootfs root=mtd:ubi_rootfs ...";
+		 * the later root= wins. clk_ignore_unused as stock.
+		 */
+		bootargs-append = " ubi.block=0,ubi_rootfs root=/dev/ubiblock0_1 clk_ignore_unused";
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		/* 0x4a900000-0x4cc00000: Q6 root PD code + PD1 data (stock
+		 * q6_code_data + q6_ipq5332_data). q6_region is resized below.
+		 */
+		m3_dump: m3-dump@4cc00000 {
+			reg = <0x0 0x4cc00000 0x0 0x100000>;
+			no-map;
+		};
+
+		q6_etr: q6-etr-dump@4cd00000 {
+			reg = <0x0 0x4cd00000 0x0 0x100000>;
+			no-map;
+		};
+
+		q6_qcn6432_data: q6-qcn6432-data@4ce00000 {
+			reg = <0x0 0x4ce00000 0x0 0x1000000>;
+			no-map;
+		};
+
+		m3_dump_qcn6432: m3-dump-qcn6432@4de00000 {
+			reg = <0x0 0x4de00000 0x0 0x100000>;
+			no-map;
+		};
+
+		q6_qcn6432_etr: q6-qcn6432-etr@4df00000 {
+			reg = <0x0 0x4df00000 0x0 0x100000>;
+			no-map;
+		};
+
+		mlo_mem: mlo-global-mem@4e000000 {
+			reg = <0x0 0x4e000000 0x0 0x700000>;
+			no-map;
+		};
+
+		rsvd1@4e700000 {
+			reg = <0x0 0x4e700000 0x0 0x80000>;
+			no-map;
+		};
+
+		/* Stock has no caldb regions (cold-boot calibration off in the
+		 * 256M profile); ath12k wants the handle, so carve them from the
+		 * top of RAM.
+		 */
+		q6_caldb: q6-caldb@4f000000 {
+			reg = <0x0 0x4f000000 0x0 0x500000>;
+			no-map;
+		};
+
+		q6_qcn6432_caldb: q6-qcn6432-caldb@4f500000 {
+			reg = <0x0 0x4f500000 0x0 0x500000>;
+			no-map;
+		};
+	};
+
+	soc@0 {
+		wifi1: wifi-qcn6432 {
+			compatible = "qcom,qcn6432-wifi";
+			msi-parent = <&v2m0>;
+			interrupts-extended = <&smp2p_wcss_in 16 IRQ_TYPE_NONE>,
+					      <&smp2p_wcss_in 17 IRQ_TYPE_NONE>,
+					      <&smp2p_wcss_in 20 IRQ_TYPE_NONE>,
+					      <&smp2p_wcss_in 19 IRQ_TYPE_NONE>;
+			interrupt-names = "fatal",
+					  "ready",
+					  "spawn",
+					  "stop-ack";
+			qcom,smem-states = <&smp2p_wcss_out 16>,
+					   <&smp2p_wcss_out 17>,
+					   <&smp2p_wcss_out 18>;
+			qcom,smem-state-names = "shutdown",
+						"stop",
+						"spawn";
+			firmware-name = "ath12k/QCN6432/hw1.0/q6_fw2.mdt",
+					"ath12k/QCN6432/hw1.0/iu_fw.mdt";
+			memory-region = <&q6_region>, <&m3_dump_qcn6432>,
+					<&q6_qcn6432_caldb>, <&mlo_mem>,
+					<&q6_qcn6432_data>;
+			memory-region-names = "q6-region", "m3-dump", "q6-caldb",
+					      "mlo-global-mem", "host-ddr-mem";
+			qcom,bdf-address-offset = <0>;
+			qcom,board-id = <96>;
+			nvmem-cells = <&base_macaddr 3>;
+			nvmem-cell-names = "mac-address";
+			qcom,legacy-userpd-bootinfo;
+			qcom,rproc = <&q6v5_wcss>;
+			status = "okay";
+		};
+
+		gpio_keys {
+			compatible = "gpio-keys";
+			pinctrl-0 = <&button_pins>;
+			pinctrl-names = "default";
+			status = "okay";
+
+			reset {
+				label = "reset";
+				linux,code = <KEY_RESTART>;
+				gpios = <&tlmm 43 GPIO_ACTIVE_LOW>;
+			};
+
+			wps {
+				label = "mesh";
+				linux,code = <KEY_WPS_BUTTON>;
+				gpios = <&tlmm 35 GPIO_ACTIVE_LOW>;
+			};
+		};
+	};
+};
+
+&blsp1_uart0 {
+	pinctrl-0 = <&serial_0_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&tlmm {
+	qspi_nand_pins: qspi_nand_pins {
+		qspi_clock {
+			pins = "gpio13";
+			function = "qspi_clk";
+			drive-strength = <8>;
+			bias-disable;
+		};
+
+		qspi_cs {
+			pins = "gpio12";
+			function = "qspi_cs";
+			drive-strength = <8>;
+			bias-disable;
+		};
+
+		qspi_data {
+			pins = "gpio8", "gpio9", "gpio10", "gpio11";
+			function = "qspi_data";
+			drive-strength = <8>;
+			bias-disable;
+		};
+	};
+
+	button_pins: button_pins {
+		reset_button {
+			pins = "gpio43";
+			function = "gpio";
+			drive-strength = <8>;
+			bias-pull-up;
+		};
+
+		mesh_button {
+			pins = "gpio35";
+			function = "gpio";
+			drive-strength = <8>;
+			bias-pull-up;
+		};
+	};
+};
+
+&mdio {
+	status = "okay";
+	/* Bus-level reset, as the stock DTB's phy-reset-gpio: the 6.18 MDIO
+	 * core only honours per-device reset-gpios for PHYs, not for the
+	 * switch, but releases a bus reset before scanning.
+	 */
+	reset-gpios = <&tlmm 51 GPIO_ACTIVE_LOW>;
+	reset-delay-us = <10000>;
+	reset-post-delay-us = <100000>;
+
+	/* The MDIO bus also carries a Motorcomm YT8821 2.5G PHY at 0x07
+	 * (id 0x4f51ea19, read on stock); 0x0c is empty on this unit. Not
+	 * described yet: the 2.5G port is reported faulty and stays unused.
+	 * GPIO51 is the stock bus-wide PHY/switch reset. It idles as an input
+	 * with pull-down, i.e. the YT9215S stays in reset unless U-Boot brought
+	 * up its network (it does not on an autonomous bootmiwifi boot): the
+	 * MDIO core releases it when the bus registers.
+	 */
+
+	/* Motorcomm YT9215S: LAN1-3 = internal PHYs 1-3 (stock "Lan2: Phy2"),
+	 * CPU on external port 8 at 2500base-x towards PPE port 2.
+	 */
+	switch@1d {
+		compatible = "motorcomm,yt9215";
+		reg = <0x1d>;
+
+		mdio {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			sw_phy1: phy@1 {
+				reg = <1>;
+			};
+
+			sw_phy2: phy@2 {
+				reg = <2>;
+			};
+
+			sw_phy3: phy@3 {
+				reg = <3>;
+			};
+		};
+
+		ethernet-ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			ethernet-port@1 {
+				reg = <1>;
+				label = "lan1";
+				phy-mode = "internal";
+				phy-handle = <&sw_phy1>;
+			};
+
+			ethernet-port@2 {
+				reg = <2>;
+				label = "lan2";
+				phy-mode = "internal";
+				phy-handle = <&sw_phy2>;
+			};
+
+			ethernet-port@3 {
+				reg = <3>;
+				label = "lan3";
+				phy-mode = "internal";
+				phy-handle = <&sw_phy3>;
+			};
+
+			ethernet-port@8 {
+				reg = <8>;
+				phy-mode = "2500base-x";
+				ethernet = <&ppe_port2>;
+
+				fixed-link {
+					speed = <2500>;
+					full-duplex;
+					pause;
+				};
+			};
+		};
+	};
+};
+
+&qcom_ppe {
+	status = "okay";
+
+	ethernet-ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* port@1 (QCA8081 2.5G at MDIO 0x0c) disabled: phy reset timed out
+		 * in the first test; the PPE error path then oopsed.
+		 */
+
+		/* Stock: port_id 2, forced-speed 2500 full duplex, to YT9215S */
+		ppe_port2: port@2 {
+			reg = <2>;
+			phy-mode = "2500base-x";
+			label = "eth0";
+			nvmem-cells = <&base_macaddr 1>;
+			nvmem-cell-names = "mac-address";
+			pcs-handle = <&pcs1_ch0>;
+			clocks = <&nsscc NSS_CC_PORT2_MAC_CLK>,
+				 <&nsscc NSS_CC_PORT2_RX_CLK>,
+				 <&nsscc NSS_CC_PORT2_TX_CLK>;
+			clock-names = "mac", "rx", "tx";
+			resets = <&nsscc NSS_CC_PORT2_MAC_CLK_ARES>,
+				 <&nsscc NSS_CC_PORT2_RX_CLK_ARES>,
+				 <&nsscc NSS_CC_PORT2_TX_CLK_ARES>;
+			reset-names = "mac", "rx", "tx";
+
+			fixed-link {
+				speed = <2500>;
+				full-duplex;
+				/* The 1G user ports have small egress buffers: without
+				 * pause on this 2.5G link the switch drops TSO bursts
+				 * from the CPU (TCP router->LAN capped near 500 Mb/s
+				 * with ~11k retransmissions per 15 s).
+				 */
+				pause;
+			};
+		};
+	};
+};
+
+&pcs0 {
+	status = "okay";
+};
+
+&pcs1 {
+	status = "okay";
+};
+
+&qpic_nand {
+	pinctrl-0 = <&qspi_nand_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+
+	nand_flash: flash@0 {
+		compatible = "spi-nand";
+		reg = <0>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		/* Test 3: host ECC 8/512 like GL (4/512 gave -EBADMSG, on-die
+		 * returned the QPIC codeword layout raw).
+		 */
+		nand-ecc-engine = <&qpic_nand>;
+		nand-ecc-strength = <8>;
+		nand-ecc-step-size = <512>;
+
+		partitions {
+			compatible = "qcom,smem-part";
+
+			partition-0-art {
+				label = "0:art";
+				read-only;
+
+				nvmem-layout {
+					compatible = "fixed-layout";
+					#address-cells = <1>;
+					#size-cells = <1>;
+
+					base_macaddr: mac-address@6 {
+						compatible = "mac-base";
+						reg = <0x6 0x6>;
+						#nvmem-cell-cells = <1>;
+					};
+				};
+			};
+		};
+	};
+};
+
+&qpic_bam {
+	status = "okay";
+};
+
+&ref_48mhz_clk {
+	clock-div = <1>;
+	clock-mult = <1>;
+};
+
+&sleep_clk {
+	clock-frequency = <32000>;
+};
+
+&xo_board {
+	clock-div = <2>;
+	clock-mult = <1>;
+};
+
+&xo_clk {
+	clock-frequency = <48000000>;
+};
+
+/* Root PD code + PD1 data: 0x4a900000-0x4cc00000 (stock 256M layout) */
+&q6_region {
+	reg = <0x0 0x4a900000 0x0 0x2300000>;
+};
+
+&wifi0 {
+	firmware-name = "ath12k/IPQ5332/hw1.0/q6_fw1.mdt",
+			"ath12k/IPQ5332/hw1.0/iu_fw.mdt";
+	memory-region = <&q6_region>, <&m3_dump>, <&q6_caldb>, <&mlo_mem>;
+	memory-region-names = "q6-region", "m3-dump", "q6-caldb", "mlo-global-mem";
+	/* stock qcom,bdf-addr 0x4bd00000 */
+	qcom,bdf-address-offset = <0x1400000>;
+	qcom,board-id = <0x13>;
+	nvmem-cells = <&base_macaddr 2>;
+	nvmem-cell-names = "mac-address";
+	qcom,legacy-userpd-bootinfo;
+	qcom,rproc = <&q6v5_wcss>;
+	status = "okay";
+};
+
+&q6v5_wcss {
+	firmware-name = "ath12k/IPQ5332/hw1.0/q6_fw0.mdt";
+	/* Stock RD15 (fw 1.3) uses <1 4 3 1 0x2f 2>; with the WLAN.WBE.1.4
+	 * firmware that made PD2 die with err_smem_ver. GL-BE3600 record,
+	 * which matches fw 1.4:
+	 */
+	boot-args = <1 5 3 1 0x2f 2 0>;
+	status = "okay";
+};

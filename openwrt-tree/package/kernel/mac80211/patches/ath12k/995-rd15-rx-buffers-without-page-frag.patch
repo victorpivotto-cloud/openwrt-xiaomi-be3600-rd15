@@ -1,0 +1,91 @@
+Subject: wifi: ath12k: allocate RX ring buffers with alloc_skb()
+
+RX buffers stay posted in the rings for a long time. dev_alloc_skb() takes
+them from the per-CPU page_frag cache (32 KiB compound pages), so after
+traffic a single live buffer can pin a whole 32 KiB page. On the 256 MiB
+Xiaomi RD15, 1500 pings of 1400 bytes took available memory from ~23 MB to
+<5 MB and the OOM killer started killing userspace. kmalloc-backed skbs
+free exactly what they hold; with this patch a 10-minute 12000-ping load
+per band kept available memory flat at ~35 MB.
+
+Candidate for upstream submission (needs review of the performance
+trade-off on large-memory systems).
+---
+diff -ruN a/drivers/net/wireless/ath/ath12k/ce.c b/drivers/net/wireless/ath/ath12k/ce.c
+--- a/drivers/net/wireless/ath/ath12k/ce.c	2026-10-11 13:31:34.798352806 -0300
++++ b/drivers/net/wireless/ath/ath12k/ce.c	2026-10-11 13:31:46.217688524 -0300
+@@ -69,7 +69,7 @@
+ 
+ 	spin_lock_bh(&ab->ce.ce_lock);
+ 	while (pipe->rx_buf_needed) {
+-		skb = dev_alloc_skb(pipe->buf_sz);
++		skb = ath12k_alloc_rx_skb(pipe->buf_sz);
+ 		if (!skb) {
+ 			ret = -ENOMEM;
+ 			goto exit;
+diff -ruN a/drivers/net/wireless/ath/ath12k/core.h b/drivers/net/wireless/ath/ath12k/core.h
+--- a/drivers/net/wireless/ath/ath12k/core.h	2026-10-11 13:31:34.794493555 -0300
++++ b/drivers/net/wireless/ath/ath12k/core.h	2026-10-11 13:31:46.217612545 -0300
+@@ -1463,4 +1463,20 @@
+ {
+ 	return container_of(dp, struct ath12k, dp);
+ }
++
++/* RX buffers stay mapped in the rings for a long time. dev_alloc_skb()
++ * carves them from the per-CPU page_frag cache (32 KiB pages), so after
++ * traffic one live buffer can pin a whole 32 KiB page: on a 256 MiB board
++ * (Xiaomi RD15) that drove the system into OOM after a few hundred large
++ * frames. kmalloc-backed skbs free exactly what they hold.
++ */
++static inline struct sk_buff *ath12k_alloc_rx_skb(unsigned int len)
++{
++	struct sk_buff *skb = alloc_skb(len + NET_SKB_PAD, GFP_ATOMIC);
++
++	if (skb)
++		skb_reserve(skb, NET_SKB_PAD);
++	return skb;
++}
++
+ #endif /* _CORE_H_ */
+diff -ruN a/drivers/net/wireless/ath/ath12k/dp_mon.c b/drivers/net/wireless/ath/ath12k/dp_mon.c
+--- a/drivers/net/wireless/ath/ath12k/dp_mon.c	2026-10-11 13:31:34.802147877 -0300
++++ b/drivers/net/wireless/ath/ath12k/dp_mon.c	2026-10-11 13:31:46.217773654 -0300
+@@ -44,7 +44,7 @@
+ 	struct sk_buff *skb;
+ 	dma_addr_t paddr;
+ 
+-	skb = dev_alloc_skb(RX_MON_STATUS_BUF_SIZE);
++	skb = ath12k_alloc_rx_skb(RX_MON_STATUS_BUF_SIZE);
+ 
+ 	if (!skb)
+ 		goto fail_alloc_skb;
+@@ -667,7 +667,7 @@
+ 	ath12k_hal_srng_access_begin(ab, srng);
+ 
+ 	while (req_entries > 0) {
+-		skb = dev_alloc_skb(DP_RX_BUFFER_SIZE + DP_RX_BUFFER_ALIGN_SIZE);
++		skb = ath12k_alloc_rx_skb(DP_RX_BUFFER_SIZE + DP_RX_BUFFER_ALIGN_SIZE);
+ 		if (unlikely(!skb))
+ 			goto fail_alloc_skb;
+ 
+@@ -756,7 +756,7 @@
+ 	num_remain = req_entries;
+ 
+ 	while (num_remain > 0) {
+-		skb = dev_alloc_skb(RX_MON_STATUS_BUF_SIZE);
++		skb = ath12k_alloc_rx_skb(RX_MON_STATUS_BUF_SIZE);
+ 		if (!skb)
+ 			break;
+ 
+diff -ruN a/drivers/net/wireless/ath/ath12k/dp_rx.c b/drivers/net/wireless/ath/ath12k/dp_rx.c
+--- a/drivers/net/wireless/ath/ath12k/dp_rx.c	2026-10-11 13:31:34.805911718 -0300
++++ b/drivers/net/wireless/ath/ath12k/dp_rx.c	2026-10-11 13:31:46.217918973 -0300
+@@ -114,7 +114,7 @@
+ 	}
+ 
+ 	while (num_remain > 0) {
+-		skb = dev_alloc_skb(DP_RX_BUFFER_SIZE +
++		skb = ath12k_alloc_rx_skb(DP_RX_BUFFER_SIZE +
+ 				    DP_RX_BUFFER_ALIGN_SIZE);
+ 		if (!skb)
+ 			break;

@@ -1,0 +1,7 @@
+# RD15 lab: a Q6 crash coredump needs more RAM than 256 MiB boards have
+rd15_rproc_nodump() {
+	for f in /sys/class/remoteproc/remoteproc*/coredump; do
+		[ -w "$f" ] && echo disabled > "$f"
+	done
+}
+boot_hook_add preinit_main rd15_rproc_nodump
