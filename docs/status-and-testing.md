@@ -2,6 +2,23 @@
 
 All results below are from **one RD15** in an isolated bench setup. Rates are application throughput from `iperf3`, not PHY negotiation rates. The router itself was the other `iperf3` endpoint; direct bridged Wi-Fi↔LAN throughput remains unmeasured.
 
+## Installed version and independent build
+
+On 11 October 2026, `/etc/openwrt_release` on the running router reported
+`OpenWrt SNAPSHOT r35705-e46ea77ba4`, target `qualcommbe/ipq53xx`;
+`uname -r` reported `6.18.39`. This is the local RD15 port, not an official
+OpenWrt release. The running image was installed from the development build.
+
+A separate clean tree prepared from this public repository and the pinned
+base/feeds completed a container build on the same date. Its target output
+contains an initramfs FIT, `factory.ubi` and `sysupgrade.bin`; all entries in
+the generated `sha256sums` verified. The build reports the same revision and
+kernel version. Its initramfs FIT SHA-256 is
+`06a2ac76a44d1f2661259911d16b2d867b200847af5790da4461ade891fdd2e0`.
+These newly built images have **not** been booted or installed on the router.
+The generated `factory.ubi` and `sysupgrade.bin` remain unsupported
+installation paths; see [limitations.md](limitations.md).
+
 | Link | PC → RD15 | RD15 → PC | Conditions |
 |---|---:|---:|---|
 | 1 GbE LAN | ~900 Mb/s | 933–937 Mb/s | USB Ethernet client, after CPU-switch flow-control fix |

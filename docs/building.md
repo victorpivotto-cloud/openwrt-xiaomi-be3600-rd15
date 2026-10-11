@@ -19,7 +19,20 @@ The pinned base is [`fivefold3/openwrt-gl-be3600`](https://github.com/fivefold3/
 
    If your host UID is not 1000, adjust the container user or directory permissions first. Feed/package downloads can produce warnings for packages unrelated to this target; a nonzero build exit code still requires investigation.
 
-4. Record SHA-256 hashes of the resulting FIT, initramfs and SquashFS before copying them to the router. Check FIT structure with `dumpimage -l`. Keep the files and their hashes together in a private directory.
+4. Verify the generated manifest and inspect the initramfs FIT with the
+   U-Boot tool built in the tree:
+
+   ```sh
+   cd "$HOME/rd15-build/bin/targets/qualcommbe/ipq53xx"
+   sha256sum -c sha256sums
+   "$HOME/rd15-build/staging_dir/host/bin/mkimage" -l \
+       openwrt-qualcommbe-ipq53xx-xiaomi_rd15-initramfs-uImage.itb
+   ```
+
+   Record hashes of any image actually used for a RAM boot or installation,
+   and keep images and hashes together in a private directory. Generating
+   `factory.ubi` and `sysupgrade.bin` does not make either a supported
+   installation path; see [limitations.md](limitations.md).
 
 `scripts/prepare-tree.sh` applies the patch to an exact base commit, then copies new files into the tree. Its `.config` is the tested *diffconfig*, not a full build cache. `make defconfig` expands it. Do not run `git add -A` inside a build tree after staging firmware or an SSH public key: both are local inputs, and built images contain proprietary firmware.
 
