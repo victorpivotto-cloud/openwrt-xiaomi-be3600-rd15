@@ -1,0 +1,31 @@
+Subject: wifi: ath12k: module parameter to force the firmware mem_cfg_mode
+
+Diagnostic knob: fw_mem_cfg_mode overrides the memory mode reported to the
+firmware in the QMI host capabilities. -1 (default) keeps the driver's
+choice, so the patch is inert unless the parameter is set.
+---
+--- a/drivers/net/wireless/ath/ath12k/qmi.c	2026-10-11 08:43:05.201978474 -0300
++++ b/drivers/net/wireless/ath/ath12k/qmi.c	2026-10-11 08:43:05.212406502 -0300
+@@ -13,6 +13,12 @@
+ #include <linux/of.h>
+ #include <linux/firmware.h>
+ #include <linux/of_address.h>
++
++/* Memory mode reported to the firmware in host capabilities. -1 keeps the
++ * driver's choice; QSDK RD15 firmware runs its 256M profile with mode 2.
++ */
++static int ath12k_fw_mem_cfg_mode = -1;
++module_param_named(fw_mem_cfg_mode, ath12k_fw_mem_cfg_mode, int, 0444);
+ #include <linux/ioport.h>
+ 
+ #define SLEEP_CLOCK_SELECT_INTERNAL_BIT	0x02
+@@ -2207,7 +2213,8 @@
+ 
+ 	req.num_clients_valid = 1;
+ 	req.num_clients = 1;
+-	req.mem_cfg_mode = ab->qmi.target_mem_mode;
++	req.mem_cfg_mode = ath12k_fw_mem_cfg_mode >= 0 ?
++			   ath12k_fw_mem_cfg_mode : ab->qmi.target_mem_mode;
+ 	req.mem_cfg_mode_valid = 1;
+ 	req.bdf_support_valid = 1;
+ 	req.bdf_support = 1;

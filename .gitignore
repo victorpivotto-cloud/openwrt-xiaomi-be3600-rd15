@@ -1,0 +1,40 @@
+# Local build trees and generated artifacts
+build/
+build-*/
+dl/
+bin/
+staging_dir/
+tmp/
+logs/
+*.itb
+*.ubi
+*.ubifs
+*.squashfs
+*.img
+*.bin
+*.dtb
+*.ko
+*.elf
+*.cpio
+*.tar
+*.tar.gz
+*.tar.xz
+*.zip
+
+# Private firmware, keys, calibration and backups
+firmware/
+vendor-firmware/
+backups/
+secrets/
+private/
+authorized_keys
+id_*
+*.key
+*.pem
+ART*
+bdata*
+
+# Local tools and editor files
+.DS_Store
+*~
+*.swp

@@ -1,0 +1,29 @@
+Subject: wifi: ath12k: shrink the LOW_512M memory profile for 256 MiB boards
+
+The Xiaomi BE3600 RD15 has 256 MiB of DDR, of which roughly 145 MiB are
+left to Linux after the Q6 carve-outs. With two radios the LOW_512M
+datapath sizes still ran the system out of memory. Reduce the TX
+completion ring, TX descriptor pool and RX descriptor count.
+
+Board-specific tuning; not proposed upstream in this form.
+---
+--- a/drivers/net/wireless/ath/ath12k/core.c	2026-10-10 23:10:01.066639396 -0300
++++ b/drivers/net/wireless/ath/ath12k/core.c	2026-10-10 23:10:01.067985140 -0300
+@@ -60,11 +60,14 @@
+ 		.max_client_dbs = 64,
+ 		.max_client_dbs_sbs = 64,
+ 		.dp_params = {
+-			.tx_comp_ring_size = 16384,
++			/* Sized for 256 MiB boards (Xiaomi RD15: ~145 MiB for Linux
++			 * after the Q6 carve-outs); the 512M values OOM with two radios.
++			 */
++			.tx_comp_ring_size = 4096,
+ 			.rxdma_monitor_buf_ring_size = 256,
+ 			.rxdma_monitor_dst_ring_size = 512,
+-			.num_pool_tx_desc = 16384,
+-			.rx_desc_count = 6144,
++			.num_pool_tx_desc = 4096,
++			.rx_desc_count = 3072,
+ 		},
+ 	},
+ };

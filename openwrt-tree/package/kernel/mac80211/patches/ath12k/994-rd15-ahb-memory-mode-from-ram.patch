@@ -1,0 +1,26 @@
+Subject: wifi: ath12k: ahb: choose the memory profile from the RAM size
+
+The AHB probe hard-codes ATH12K_QMI_MEMORY_MODE_DEFAULT, while the PCI path
+picks the profile from the amount of RAM. On a 256 MiB IPQ5332 board the
+DEFAULT profile costs ~42 MiB of datapath rings per radio and, on the
+Xiaomi RD15, the QCN6432 user PD failed with err_smem_ver / QMI memory
+request -110. Using ath12k_core_get_memory_mode() selects LOW_512M there
+and both radios come up.
+
+Candidate for upstream submission.
+---
+--- a/drivers/net/wireless/ath/ath12k/wifi7/ahb.c	2026-10-11 09:08:16.648561892 -0300
++++ b/drivers/net/wireless/ath/ath12k/wifi7/ahb.c	2026-10-11 09:08:16.658072444 -0300
+@@ -63,7 +63,11 @@
+ 		return -EOPNOTSUPP;
+ 	}
+ 
+-	ab->target_mem_mode = ATH12K_QMI_MEMORY_MODE_DEFAULT;
++	/* Pick the memory profile from the RAM size like the PCI path does;
++	 * the hard-coded DEFAULT profile costs ~42 MiB of DP rings per radio,
++	 * which a 256 MiB IPQ5332 board (Xiaomi RD15) cannot afford.
++	 */
++	ab->target_mem_mode = ath12k_core_get_memory_mode(ab);
+ 	ab->hw_rev = hw_rev;
+ 
+ 	ret = ath12k_wifi7_hw_init(ab);

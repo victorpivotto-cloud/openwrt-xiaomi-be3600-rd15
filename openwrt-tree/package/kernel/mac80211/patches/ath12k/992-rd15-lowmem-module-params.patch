@@ -1,0 +1,59 @@
+Subject: wifi: ath12k: module parameters to override memory-profile datapath sizes
+
+Diagnostic knobs used while sizing 990/991: lowmem_rx_desc, lowmem_tx_desc,
+lowmem_tx_comp, lowmem_mon_buf and lowmem_mon_dst override the selected
+memory profile at load time. 0 (default) keeps the profile value, so the
+patch is inert unless a parameter is set.
+---
+--- a/drivers/net/wireless/ath/ath12k/core.c	2026-10-10 23:24:11.091303010 -0300
++++ b/drivers/net/wireless/ath/ath12k/core.c	2026-10-10 23:24:11.101297246 -0300
+@@ -32,6 +32,21 @@
+ 
+ bool ath12k_ftm_mode;
+ module_param_named(ftm_mode, ath12k_ftm_mode, bool, 0444);
++
++/* Low-memory tuning (Xiaomi RD15, 256 MiB): override the selected memory
++ * profile's datapath sizes at load time; 0 keeps the profile value.
++ */
++static unsigned int ath12k_lowmem_rx_desc;
++module_param_named(lowmem_rx_desc, ath12k_lowmem_rx_desc, uint, 0444);
++static unsigned int ath12k_lowmem_tx_desc;
++module_param_named(lowmem_tx_desc, ath12k_lowmem_tx_desc, uint, 0444);
++static unsigned int ath12k_lowmem_tx_comp;
++module_param_named(lowmem_tx_comp, ath12k_lowmem_tx_comp, uint, 0444);
++static unsigned int ath12k_lowmem_mon_buf;
++module_param_named(lowmem_mon_buf, ath12k_lowmem_mon_buf, uint, 0444);
++static unsigned int ath12k_lowmem_mon_dst;
++module_param_named(lowmem_mon_dst, ath12k_lowmem_mon_dst, uint, 0444);
++static struct ath12k_mem_profile_based_param ath12k_lowmem_param;
+ MODULE_PARM_DESC(ftm_mode, "Boots up in factory test mode");
+ EXPORT_SYMBOL(ath12k_ftm_mode);
+ 
+@@ -1872,6 +1883,27 @@
+ 		ab->dt_mac_addr_valid = true;
+ 
+ 	param = &ath12k_mem_profile_based_param[ab->target_mem_mode];
++	if (ath12k_lowmem_rx_desc || ath12k_lowmem_tx_desc ||
++	    ath12k_lowmem_tx_comp || ath12k_lowmem_mon_buf ||
++	    ath12k_lowmem_mon_dst) {
++		ath12k_lowmem_param = *param;
++		if (ath12k_lowmem_rx_desc)
++			ath12k_lowmem_param.dp_params.rx_desc_count =
++				ath12k_lowmem_rx_desc;
++		if (ath12k_lowmem_tx_desc)
++			ath12k_lowmem_param.dp_params.num_pool_tx_desc =
++				ath12k_lowmem_tx_desc;
++		if (ath12k_lowmem_tx_comp)
++			ath12k_lowmem_param.dp_params.tx_comp_ring_size =
++				ath12k_lowmem_tx_comp;
++		if (ath12k_lowmem_mon_buf)
++			ath12k_lowmem_param.dp_params.rxdma_monitor_buf_ring_size =
++				ath12k_lowmem_mon_buf;
++		if (ath12k_lowmem_mon_dst)
++			ath12k_lowmem_param.dp_params.rxdma_monitor_dst_ring_size =
++				ath12k_lowmem_mon_dst;
++		param = &ath12k_lowmem_param;
++	}
+ 	ab->profile_param = param;
+ 	ath12k_fw_map(ab);
+ 
