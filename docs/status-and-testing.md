@@ -31,4 +31,28 @@ Before the `pause` fix, the Ethernet router-to-PC runs were 492, 490 and 492 Mb/
 
 Both APs authenticated a test client and survived 12,000 ICMP probes of 1400 bytes per band without an out-of-memory event. Available RAM was roughly 34–37 MiB. This is a short stress test; it is not an endurance claim.
 
+## Isolated 5 GHz endurance test, 11–12 October 2026
+
+A temporary laboratory SSID with WPA2 and 802.11r/k/v was enabled for a
+15-hour radio test; the normal household SSIDs stayed off. One MT7922 client
+remained on channel 36/HE80 at −38 to −36 dBm. All 178 five-minute ping
+samples had 0% loss, with no BSSID change or router reboot. Router thermal
+readings stayed between 60.8 and 63.8 °C. The original wireless and
+`usteer` configurations were restored and hash-checked afterward; no AP
+remained active.
+
+Fourteen hourly `iperf3` pairs finished without tool errors. Median
+throughput was **148.5 Mb/s client→RD15** and **233.8 Mb/s RD15→client**.
+Ranges were 121.5–341.2 and 208.0–508.2 Mb/s respectively; only one
+pair reached the earlier ~340/500 Mb/s class. During several slower runs,
+neither the router nor the client showed sustained CPU saturation or
+`softnet` drops. PHY rates and RSSI stayed high. This does not identify
+whether the remaining variation is in the AP, client or radio environment;
+the AP should not replace a proven household AP on throughput grounds yet.
+
+The test confirmed 802.11k neighbor advertisement and a response to an
+802.11v transition request, but the client was pinned to a BSSID and refused
+the transition. It did **not** validate a real 802.11r roam. Forwarded
+Wi-Fi↔LAN throughput and multi-client behavior also remain unmeasured.
+
 Not measured: direct Wi-Fi↔LAN bridge throughput, simultaneous clients, WAN routing, 2.5 GbE, WPA3, MLO or real-world roaming. See [limitations.md](limitations.md).

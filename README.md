@@ -24,7 +24,7 @@ into your local build tree ([docs/vendor-firmware.md](docs/vendor-firmware.md)).
 | Boot | Autonomous boot from NAND through the stock `bootmiwifi`; slot marked good so the bootloader does not fall back |
 | Ethernet | 3 × 1 GbE LAN through the Motorcomm YT9215S (backported `yt921x` DSA driver); ~910–935 Mb/s TCP each way |
 | Wi-Fi 2.4 GHz | AP, WPA2-PSK, HE20; ~131/~95 Mb/s TCP with a 2×2 client whose Bluetooth was off |
-| Wi-Fi 5 GHz | AP, WPA2-PSK, HE80; ~390/~495 Mb/s TCP to one 2×2 client. FT-PSK (802.11r) + 11k/11v come up in hostapd; roaming not measured |
+| Wi-Fi 5 GHz | AP, WPA2-PSK, HE80; ~390/~495 Mb/s in short tests, but only 149/234 Mb/s median over a 15-hour test with one 2×2 client. Ping stayed lossless; roaming not measured |
 | Storage | SquashFS root + UBIFS overlay in the stock UBI volumes |
 | Fallback | `rd15-slot boot-stock` returns to the Xiaomi slot; Xiaomi can switch back to OpenWrt |
 | Memory | ~35 MB available with both radios up, flat over a 10-minute load |
