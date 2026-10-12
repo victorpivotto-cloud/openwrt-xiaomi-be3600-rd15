@@ -1,0 +1,64 @@
+Subject: net: qualcomm: ppe: unwind initialized ports on probe failure
+
+The EDMA failure path can drive the port index below zero before clock
+cleanup, causing out-of-bounds access. Also unwind previously registered
+ports on other setup failures and release the current port clocks.
+
+Stage B RAM test prerequisite; no installed image uses this patch yet.
+
+---
+--- a/drivers/net/ethernet/qualcomm/ppe/ppe_port.c
++++ b/drivers/net/ethernet/qualcomm/ppe/ppe_port.c
+@@ -1393,20 +1393,19 @@
+ 		ret = ppe_port_clock_init(&ppe_ports->port[i]);
+ 		if (ret) {
+ 			dev_err(ppe_dev->dev, "Failed to initialize port clocks\n");
+-			goto err_port_clk;
++			goto err_port_node;
+ 		}
+ 
+ 		ret = ppe_port_mac_hw_init(&ppe_ports->port[i]);
+ 		if (ret) {
+ 			dev_err(ppe_dev->dev, "Failed to initialize MAC hardware\n");
+-			goto err_port_node;
++			goto err_port_clk;
+ 		}
+ 
+ 		ret = edma_port_setup(&ppe_ports->port[i]);
+ 		if (ret) {
+ 			dev_err(ppe_dev->dev, "QCOM EDMA port setup failed\n");
+-			i--;
+-			goto err_port_setup;
++			goto err_port_clk;
+ 		}
+ 
+ 		i++;
+@@ -1415,21 +1414,16 @@
+ 	of_node_put(ports_node);
+ 	return 0;
+ 
+-err_port_setup:
+-	/* Destroy edma ports created till now */
+-	while (i >= 0) {
+-		edma_port_destroy(&ppe_ports->port[i]);
+-		i--;
+-	}
+-
+ err_port_clk:
+-	while (i) {
+-		i--;
+-		ppe_port_clock_deinit(&ppe_ports->port[i]);
+-	}
+-
++	/* Port i has clocks enabled but no EDMA port. */
++	ppe_port_clock_deinit(&ppe_ports->port[i]);
+ err_port_node:
+ 	of_node_put(port_node);
++	/* Ports 0..i-1 are fully initialized. */
++	while (i--) {
++		edma_port_destroy(&ppe_ports->port[i]);
++		ppe_port_clock_deinit(&ppe_ports->port[i]);
++	}
+ err_ports_node:
+ 	of_node_put(ports_node);
+ 	return ret;
