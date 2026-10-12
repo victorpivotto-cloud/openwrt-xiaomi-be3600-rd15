@@ -301,10 +301,25 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		/* port@1 (2.5G) omitted. The first test targeted QCA8081 at 0x0c,
-		 * absent on this unit; PHY reset timed out and the PPE error path
-		 * then oopsed. A YT8821-specific test is still needed.
+		/* RAM test B: standalone 2.5G jack, not added to br-lan. Omit a
+		 * board MAC until the stock eth1 offset has been confirmed; the
+		 * driver assigns a random MAC for this isolated test.
 		 */
+		port@1 {
+			reg = <1>;
+			phy-mode = "sgmii";
+			label = "eth1";
+			phy-handle = <&yt8821>;
+			pcs-handle = <&pcs0_ch0>;
+			clocks = <&nsscc NSS_CC_PORT1_MAC_CLK>,
+				 <&nsscc NSS_CC_PORT1_RX_CLK>,
+				 <&nsscc NSS_CC_PORT1_TX_CLK>;
+			clock-names = "mac", "rx", "tx";
+			resets = <&nsscc NSS_CC_PORT1_MAC_CLK_ARES>,
+				 <&nsscc NSS_CC_PORT1_RX_CLK_ARES>,
+				 <&nsscc NSS_CC_PORT1_TX_CLK_ARES>;
+			reset-names = "mac", "rx", "tx";
+		};
 
 		/* Stock: port_id 2, forced-speed 2500 full duplex, to YT9215S */
 		ppe_port2: port@2 {
