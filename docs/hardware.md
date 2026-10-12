@@ -13,7 +13,7 @@ output and a running unit. "Observed" means seen on one unit only.
 | 2.4 GHz | IPQ5332 integrated radio, board-id `0x13` |
 | 5 GHz | QCN6432 (AHB, user PD 2), board-id `0x60` |
 | Switch | Motorcomm YT9215S at MDIO `0x1d`. LAN1–3 = internal PHYs 1–3. CPU on external port 8, 2500base-x fixed link to PPE port 2 |
-| 2.5 GbE port | Motorcomm **YT8821** PHY (id `0x4f51ea19`) at MDIO `0x07`. Not a QCA8081; nothing answers at `0x0c`. Not supported by this port |
+| 2.5 GbE port | A prior stock-side read on this unit found Motorcomm **YT8821** (id `0x4f51ea19`) at MDIO `0x07`, with no response at `0x0c`. The stock DTB lists both that address and QCA8081 at `0x0c`, and the stock scripts select a driver based on which PHY is present. PPE port 1 is omitted from this OpenWrt DTS; link and throughput are untested here |
 | Buttons | reset = GPIO43, "mesh" (WPS) = GPIO35, both active low |
 | MDIO reset | GPIO51 resets the whole bus (switch + PHYs). It idles as an input with pull-down, so the YT9215S stays in reset unless something releases it |
 | Serial | 115200 8N1, **1.8 V logic** |
