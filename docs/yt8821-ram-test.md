@@ -57,12 +57,12 @@ it remains unverified on this hardware. Start without
 than requiring PCS in-band negotiation. If needed, test an in-band variant
 separately. Do not infer success from a PHY ID alone.
 
-Use a unique MAC derived from the board's existing base MAC, but confirm the
-stock eth1 offset before making a permanent DTS. The installed image already
-uses offsets 1, 2 and 3 for eth0 and the radios. An experimental image may use
-offset 0 if the resulting address is distinct; this offset is unverified and
-may already serve another stock function. Never publish the actual MAC.
-Leave the interface out of all bridges and DHCP configuration.
+For this isolated RAM test, the DTS omits `nvmem-cells`; the driver assigns a
+random MAC to `eth1`. Confirm the stock eth1 offset before making a permanent
+DTS. The installed image already uses offsets 1, 2 and 3 for eth0 and the
+radios; offset 0 is unverified and may already serve another stock function.
+Never publish the actual MAC. Leave the interface out of all bridges and DHCP
+configuration.
 
 Observe the entire serial boot. Verify the port's PHY/PCS/phylink probe, then
 connect a known-good 1 GbE partner and a 2.5 GbE partner in turn. For each,
@@ -86,5 +86,8 @@ dynamic mode-switch problem; it cannot validate 1 Gb/s fallback.
 - Keep the actual PHY/MAC identifiers and all device-specific calibration or
   backup data out of public commits and build logs.
 
-No Stage B image has been built or booted yet. The current experiment branch
-contains only Stage A source changes.
+The Stage A source is preserved on `experiment/yt8821-ram-test`. The
+`experiment/yt8821-port1-ram-test` branch adds the PPE guard and port 1 for a
+separate image. Both private initramfs variants compiled and their FIT/DTB
+hashes were checked; neither has been booted yet. Neither branch changes the
+installed slot.
