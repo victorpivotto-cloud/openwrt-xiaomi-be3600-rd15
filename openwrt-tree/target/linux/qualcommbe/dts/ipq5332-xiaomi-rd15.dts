@@ -214,14 +214,21 @@
 
 	/* The stock firmware selects QCA8081 if MDIO 0x0c is present, otherwise
 	 * YT8821. A prior stock-side read on this unit found YT8821 at 0x07
-	 * (id 0x4f51ea19), with no response at 0x0c. The 2.5G port is not
-	 * described yet, so its physical condition cannot be judged from this
+	 * (id 0x4f51ea19), with no response at 0x0c. The PPE port 1 MAC is not
+	 * described yet, so the 2.5G jack cannot be judged from this
 	 * OpenWrt build.
 	 * GPIO51 is the stock bus-wide PHY/switch reset. It idles as an input
 	 * with pull-down, i.e. the YT9215S stays in reset unless U-Boot brought
 	 * up its network (it does not on an autonomous bootmiwifi boot): the
 	 * MDIO core releases it when the bus registers.
 	 */
+	/* RAM test A: identify this unit's YT8821 before enabling PPE port 1.
+	 * GPIO51 already resets the entire MDIO bus; do not reset this PHY
+	 * separately while the YT9215S switch is in service.
+	 */
+	yt8821: ethernet-phy@7 {
+		reg = <7>;
+	};
 
 	/* Motorcomm YT9215S: LAN1-3 = internal PHYs 1-3 (stock "Lan2: Phy2"),
 	 * CPU on external port 8 at 2500base-x towards PPE port 2.

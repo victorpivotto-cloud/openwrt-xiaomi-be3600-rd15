@@ -9,7 +9,8 @@ BASE_COMMIT (new files live under openwrt-tree/):
 - board.d/02_network: lan = lan1 lan2 lan3 (YT9215S DSA user ports).
 - hotplug.d/firmware/12-ath12k-caldata: reuse the GL-BE3600 ART offsets
   (same AP-MI04.1-C2 reference board) for both radios.
-- config-default: build the backported yt921x DSA driver and tagger.
+- config-default: build the backported yt921x DSA driver and tagger, and
+  the Motorcomm PHY driver for this experimental ipq53xx build.
 
 SPDX-License-Identifier: GPL-2.0-only
 ---
@@ -83,9 +84,10 @@ diff --git a/target/linux/qualcommbe/ipq53xx/config-default b/target/linux/qualc
 index 543a01e395..f1525581cb 100644
 --- a/target/linux/qualcommbe/ipq53xx/config-default
 +++ b/target/linux/qualcommbe/ipq53xx/config-default
-@@ -94,3 +94,5 @@ CONFIG_TOUCHSCREEN_HYNITRON_CST816X=y
+@@ -94,3 +94,6 @@ CONFIG_TOUCHSCREEN_HYNITRON_CST816X=y
  # ARMv8 Crypto Extensions for AES modes and GCM
  CONFIG_CRYPTO_AES_ARM64_CE_BLK=y
  CONFIG_CRYPTO_GHASH_ARM64_CE=y
 +CONFIG_NET_DSA_YT921X=y
 +CONFIG_NET_DSA_TAG_YT921X=y
++CONFIG_MOTORCOMM_PHY=y

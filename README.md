@@ -43,6 +43,7 @@ MLO, WPA3 (untested). Details in [docs/status-and-testing.md](docs/status-and-te
 | [docs/recovery-and-rollback.md](docs/recovery-and-rollback.md) | Back to Xiaomi with and without SSH, restoring slot 0, what never to write |
 | [docs/status-and-testing.md](docs/status-and-testing.md) | Test log and measurements |
 | [docs/stock-firmware-findings.md](docs/stock-firmware-findings.md) | What the Xiaomi 1.0.87 image reveals about PHYs, Wi-Fi memory and forwarding |
+| [docs/yt8821-ram-test.md](docs/yt8821-ram-test.md) | Staged, uninstalled test plan for the 2.5 GbE PHY and PPE port |
 | [docs/limitations.md](docs/limitations.md) | Known problems, risks and open work |
 | [docs/changes.md](docs/changes.md) | What every change in this port does and why |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Evidence and privacy rules for issues and pull requests |
