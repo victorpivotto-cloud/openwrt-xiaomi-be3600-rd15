@@ -44,6 +44,8 @@ enters `while (i)` and indexes ports below zero. The earlier QCA8081 probe
 failure reached this path. A valid PHY probe in Stage A reduces one trigger
 but does not make the PPE error path safe. Validate the fix in a separate
 build before enabling PPE port 1.
+The guard patch was build-tested on the Stage A DTS; its failure path has
+not been exercised on hardware.
 
 Only after Stage A passes, add `port@1` using `pcs0_ch0`, the port-1 MAC/RX/TX
 clocks and resets, and `phy-handle = <&yt8821>`. Start with
