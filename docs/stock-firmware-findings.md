@@ -21,6 +21,16 @@ The image also contains Xiaomi cloud and messaging services; this port does
 not include them. The cause of any prior network message flood cannot be
 attributed from this static image alone.
 
+The live OpenWrt device tree already selects both MDIO pin groups
+(GPIO25/26 and GPIO27/28) and enables PCS0. Its missing PHY/port nodes are
+therefore a more specific next target than pin multiplexing. In
+[Linux 6.18](https://github.com/torvalds/linux/blob/v6.18/drivers/net/phy/motorcomm.c),
+the YT8821 driver starts in automatic SGMII/2500BASE-X mode unless the
+initial interface is forced to `2500base-x`: it reports SGMII at 10/100/1000
+Mb/s and 2500BASE-X at 2.5 Gb/s. The stock DTB's `sgmii` setting is a useful
+starting point for a RAM test, provided the PPE/PCS driver supports this
+change of interface. This has not been tested on the RD15 port.
+
 The next hardware experiment should keep the installed slot intact: enable
 the in-kernel [Motorcomm YT8821 driver](https://github.com/torvalds/linux/blob/v6.18/drivers/net/phy/motorcomm.c)
 and the 2.5 GbE port in a RAM-boot image, verify the PHY/PCS probe on serial,
