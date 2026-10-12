@@ -2,7 +2,7 @@
 
 This is an experimental port tested on one Xiaomi BE3600 2.5G **RD15**. It is not an official OpenWrt target or a universal BE3600 image. Check the hardware ID before using any part of the installation procedure.
 
-- The 2.5 GbE WAN/LAN port (YT8821) is not supported. The three 1 GbE LAN ports work.
+- The 2.5 GbE WAN/LAN port is not enabled in the DTS. Stock firmware has code paths for either a QCA8081 at MDIO `0x0c` or a YT8821 at `0x07`; this unit previously reported YT8821. The current kernel build also has `CONFIG_MOTORCOMM_PHY` disabled. Link and throughput have not been retested with this build. The three 1 GbE LAN ports work.
 - `sysupgrade` and `factory.ubi` are not supported installation paths. Use the guarded slot-0 procedure only after a RAM boot, complete backups and a verified serial recovery path.
 - Stock U-Boot's `bootmiwifi` is needed. Booting a FIT directly with `bootm` triggered an HLOS panic on the tested unit, including with an unmodified Xiaomi FIT.
 - The original Xiaomi firmware stays in slot 1 only if that slot is intact on **your** device. Verify it before changing slot 0. This repository cannot restore calibration (`ART`), bootloader or board data.
