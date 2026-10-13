@@ -89,5 +89,28 @@ dynamic mode-switch problem; it cannot validate 1 Gb/s fallback.
 The Stage A source is preserved on `experiment/yt8821-ram-test`. The
 `experiment/yt8821-port1-ram-test` branch adds the PPE guard and port 1 for a
 separate image. Both private initramfs variants compiled and their FIT/DTB
-hashes were checked; neither has been booted yet. Neither branch changes the
-installed slot.
+hashes were checked. Both were booted from RAM on 12 October 2026; neither
+branch changes the installed slot.
+
+## Observed results on the tested RD15
+
+- Stage A bound `90000.mdio-1:07` to `YT8821 2.5Gbps PHY` with PHY ID
+  `0x4f51ea19`. The gigabit switch remained available; 20 management pings
+  had zero loss.
+- Stage B created `eth1` on that PHY and booted without an oops. With a
+  RTL8156B USB adapter in the physical 2.5 GbE jack, both ends negotiated
+  2.5 Gb/s full duplex. `eth1` was kept outside `br-lan` and assigned only
+  a temporary isolated address.
+- Local TCP throughput to the router was 1.68 Gb/s PC→RD15 and 2.34 Gb/s
+  RD15→PC with one stream, then 2.35 Gb/s PC→RD15 with four streams.
+  Router `eth1` reported zero RX/TX errors and drops.
+- A four-stream RD15→PC run stalled after roughly three seconds. The PC
+  logged RTL8156B USB read timeouts (`-110`), SuperSpeed reset attempts and
+  `r8152` transmit timeouts. The Ethernet link stayed negotiated at 2.5
+  Gb/s. This run does not qualify sustained throughput or identify whether
+  the USB adapter, port, cable or power path failed.
+
+Before a persistent image, derive a stable `eth1` MAC from verified device
+data, decide the default network role, test 1 Gb/s fallback on this jack,
+repeat sustained traffic with a reliable 2.5 GbE partner, and validate
+reboot and rollback. The installed slot still has no PPE port 1 support.
