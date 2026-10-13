@@ -41,6 +41,12 @@ Not supported in the installed image: the 2.5 GbE port, `sysupgrade`, the
 generated `factory.ubi`, MLO, WPA3 (untested). Details in
 [docs/status-and-testing.md](docs/status-and-testing.md).
 
+## Community discussion
+
+The [OpenWrt Forum discussion of this RD15 port and its bridged AP DHCP
+issue](https://forum.openwrt.org/t/experimental-xiaomi-be3600-2-5g-rd15-port-bridge-dhcp-issue-on-ipq53xx/254445)
+is open for technical findings and focused test results.
+
 ## Documentation
 
 | Document | Contents |
