@@ -29,8 +29,9 @@ into your local build tree ([docs/vendor-firmware.md](docs/vendor-firmware.md)).
 | Fallback | `rd15-slot boot-stock` returns to the Xiaomi slot; Xiaomi can switch back to OpenWrt |
 | Memory | ~35 MB available with both radios up, flat over a 10-minute load |
 
-Not supported: the 2.5 GbE port, `sysupgrade`, the generated `factory.ubi`,
-MLO, WPA3 (untested). Details in [docs/status-and-testing.md](docs/status-and-testing.md).
+Not supported in the installed image: the 2.5 GbE port, `sysupgrade`, the
+generated `factory.ubi`, MLO, WPA3 (untested). Details in
+[docs/status-and-testing.md](docs/status-and-testing.md).
 
 ## Documentation
 
