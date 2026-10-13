@@ -18,6 +18,11 @@ else:
 bad_ext = {'.bin', '.img', '.itb', '.ubi', '.ubifs', '.squashfs', '.dtb',
            '.ko', '.elf', '.cpio', '.pem', '.key', '.log', '.pcap', '.cap'}
 bad_names = {'authorized_keys', 'id_ed25519', 'id_rsa', 'bdata', 'art'}
+reviewed_images = {
+    pathlib.Path('docs/images/rd15-uart-original.jpg'),
+    pathlib.Path('docs/images/rd15-uart-pinout.png'),
+    pathlib.Path('docs/images/luci-overview.png'),
+}
 patterns = {
     'local home path': re.compile(r'/home/jvpr/'),
     'private downloads path': re.compile(r'(?:~/Downloads/|/Downloads/be3600)', re.I),
@@ -35,6 +40,11 @@ for rel in paths:
         errors.append(f'{rel}: blocked filename')
         continue
     data = path.read_bytes()
+    if rel in reviewed_images:
+        magic = b'\x89PNG\r\n\x1a\n' if rel.suffix == '.png' else b'\xff\xd8\xff'
+        if not data.startswith(magic) or len(data) > 3 * 1024 * 1024:
+            errors.append(f'{rel}: invalid or oversized reviewed image')
+        continue
     if b'\0' in data or len(data) > 1024 * 1024:
         errors.append(f'{rel}: binary or over 1 MiB')
         continue
