@@ -120,8 +120,11 @@ after temporarily removing them restored forwarding. After that, DHCPACK,
 gateway access and Internet access worked. A Wi-Fi reload and one cold
 power cycle preserved the working path: after the cold boot, the 5 GHz
 client received a lease and had 0% loss in 10 gateway and five Internet
-pings. The cause of the initial return-path failure remains open; the
-2.4 GHz household client path has not yet been checked. Details are in
+pings. A later pinned 2.4 GHz client reproduced the DHCP/return-path failure
+after that boot. A two-second `lan2` link cycle restored connectivity;
+the client then obtained DHCP and passed 10/10 gateway and 3/3 Internet
+pings. The cause remains open and the link cycle is only a workaround.
+Details are in
 [ap-deployment.md](ap-deployment.md).
 
 Not measured: direct Wi-Fi↔LAN bridge throughput, simultaneous clients, WAN routing, long-term 2.5 GbE stability, WPA3, MLO or real-world roaming. See [limitations.md](limitations.md).

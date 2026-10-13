@@ -67,10 +67,20 @@ a Wi-Fi reload. A later cold power cycle with the radios enabled returned
 to slot 0 and the pinned 5 GHz client obtained DHCP immediately, with
 10/10 gateway and 5/5 Internet pings.
 
-The 2.4 GHz client path, direct bridged throughput, multiple clients and
-roaming in the final room still require testing. Keep the former AP intact
-until those checks and longer observation pass. Do not treat one successful
-cold boot as proof that the initial forwarding issue cannot recur.
+The forwarding issue **recurred** with the first pinned 2.4 GHz `AP-2G` client
+after that cold boot. Association succeeded, but the gateway repeatedly
+logged DHCP DISCOVER/OFFER without ACK. With a temporary static IP, the
+client reached the RD15 but not the gateway. Removing the two unplugged
+bridge ports alone did not restore this connection. Cycling the `lan2`
+carrier down/up for two seconds restored gateway reachability, then the
+client obtained a DHCP lease and completed 10/10 gateway and 3/3 Internet
+pings. The unplugged ports were returned to the bridge and connectivity
+remained up. This is a runtime workaround, **not a proven fix**; the root
+cause and behavior for the next new client remain unknown.
+
+Direct bridged throughput, multiple clients and roaming in the final room
+still require testing. Keep the former AP intact and do not rely on this RD15
+as the sole access point until the forwarding fault is understood and fixed.
 
 ## Upgrade and recovery boundary
 
