@@ -80,8 +80,18 @@ A four-stream RD15→PC run stalled after three seconds. The PC then logged
 USB read timeouts (`-110`), SuperSpeed reset attempts and `r8152` transmit
 timeouts, while RD15 `eth1` stayed at 2.5 Gb/s with zero RX/TX errors and
 drops. The USB adapter, its connection and power need separate validation.
+It subsequently stopped enumerating on the PC, even after reconnecting it
+on another USB 3 port. A separate 1 GbE USB adapter on the same RD15 jack
+negotiated 1 Gb/s and completed 5/5 isolated pings, validating that speed's
+fallback independently of the failed 2.5 GbE test partner.
 These images were booted from RAM only; the installed slot still omits
 the 2.5 GbE port. A stable device-tree MAC and persistent network setup
 must be validated before installation.
+
+The RD15 was rebooted into the unchanged installed slot-0 image after this
+test. The stored FIT and rootfs matched their saved SHA-256 hashes, 10/10
+management pings succeeded, and HTTP returned 200. A separate source branch
+with a stable-MAC candidate compiled but was not booted or installed; see
+[yt8821-ram-test.md](yt8821-ram-test.md).
 
 Not measured: direct Wi-Fi↔LAN bridge throughput, simultaneous clients, WAN routing, long-term 2.5 GbE stability, WPA3, MLO or real-world roaming. See [limitations.md](limitations.md).
