@@ -29,6 +29,14 @@ into your local build tree ([docs/vendor-firmware.md](docs/vendor-firmware.md)).
 | Fallback | `rd15-slot boot-stock` returns to the Xiaomi slot; Xiaomi can switch back to OpenWrt |
 | Memory | ~35 MB available with both radios up, flat over a 10-minute load |
 
+In household AP use, a Samsung phone reached **666/520 Mb/s** on 5 GHz near
+the AP, **624/479 Mb/s** about 6 m away behind a partition and MDF closet,
+and **126/81.6 Mb/s** on 2.4 GHz. These are Internet Speedtests, not bridged
+LAN benchmarks. Initial DHCP forwarding has failed or been delayed for new
+clients even when later throughput was good; see
+[docs/ap-deployment.md](docs/ap-deployment.md). The AP remains under
+observation and is not qualified as the sole household access point.
+
 Not supported in the installed image: the 2.5 GbE port, `sysupgrade`, the
 generated `factory.ubi`, MLO, WPA3 (untested). Details in
 [docs/status-and-testing.md](docs/status-and-testing.md).

@@ -133,8 +133,8 @@ Details are in
 ## Household phone Internet test, 13 October 2026
 
 The owner's Samsung phone was confirmed on this RD15's BSSIDs by Wi-Fi
-scanner screenshots: `[redacted BSSID]` on 5 GHz `AP-5G` (channel 36, 80 MHz)
-and `[redacted BSSID]` on 2.4 GHz `AP-2G` (channel 11, 20 MHz). Ookla
+scanner screenshots: the RD15's 5 GHz `AP-5G` BSSID (channel 36, 80 MHz)
+and its 2.4 GHz `AP-2G` BSSID (channel 11, 20 MHz). Ookla
 Speedtest reported **666/520 Mb/s** download/upload and 10 ms idle latency
 on 5 GHz, and **126/81.6 Mb/s** and 11 ms idle latency on 2.4 GHz. The two
 tests displayed the same server A Internet test server in an undisclosed location. They
