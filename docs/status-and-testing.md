@@ -55,4 +55,15 @@ The test confirmed 802.11k neighbor advertisement and a response to an
 the transition. It did **not** validate a real 802.11r roam. Forwarded
 Wi-Fi↔LAN throughput and multi-client behavior also remain unmeasured.
 
+## Isolated 1 GbE endurance test, 11–12 October 2026
+
+The LAN test collected 191 samples over 16 hours. Every sample had 0% loss
+across ten ICMP probes and a valid isolated route. Router uptime increased
+continuously, no UBI bad block appeared, and the kernel error count remained
+at its single baseline NAND driver warning. Available memory ranged from
+28,040 to 36,636 KiB and recovered to 33,264 KiB by the last sample. Free
+overlay space stayed within 8,408–8,412 KiB. The temporary route was removed
+at the end. Wireless settings were restored and hash-checked, and no RD15 AP
+remained active.
+
 Not measured: direct Wi-Fi↔LAN bridge throughput, simultaneous clients, WAN routing, 2.5 GbE, WPA3, MLO or real-world roaming. See [limitations.md](limitations.md).
