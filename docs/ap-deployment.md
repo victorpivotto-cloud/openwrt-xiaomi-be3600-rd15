@@ -83,7 +83,8 @@ RD15's 5 GHz BSSID and 126/81.6 Mb/s through its 2.4 GHz BSSID in Internet
 speed tests. Both connections eventually received DHCP from the household
 gateway, but the 5 GHz connection had repeated DHCP OFFERs for about 90
 seconds before its ACK. Good throughput after association does not resolve
-the initial forwarding fault. The two tests used different Internet servers.
+the initial forwarding fault. Both screenshots show the same Vtal Internet
+test server in Porto Alegre.
 
 Direct bridged throughput, multiple clients and roaming in the final room
 still require testing. Keep the former AP intact and do not rely on this RD15

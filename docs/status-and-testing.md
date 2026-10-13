@@ -137,8 +137,9 @@ scanner screenshots: `52:88:11:b3:59:ef` on 5 GHz `902` (channel 36, 80 MHz)
 and `52:88:11:b3:59:ee` on 2.4 GHz `MOV` (channel 11, 20 MHz). Ookla
 Speedtest reported **666/520 Mb/s** download/upload and 10 ms idle latency
 on 5 GHz, and **126/81.6 Mb/s** and 11 ms idle latency on 2.4 GHz. The two
-tests used different Internet test servers, so the numbers are field results,
-not a controlled radio comparison or a measurement of bridged LAN capacity.
+tests displayed the same Vtal Internet test server in Porto Alegre. They
+are field results, not a controlled radio comparison or a measurement of
+bridged LAN capacity.
 
 The upstream gateway logged DHCPACK for the phone on both bands. For its
 5 GHz connection, however, multiple DHCPOFFERs preceded DHCPACK by roughly
