@@ -57,7 +57,7 @@ it remains unverified on this hardware. Start without
 than requiring PCS in-band negotiation. If needed, test an in-band variant
 separately. Do not infer success from a PHY ID alone.
 
-For this isolated RAM test, the DTS omits `nvmem-cells`; the driver assigns a
+For the Stage B RAM test, the DTS omits `nvmem-cells`; the driver assigns a
 random MAC to `eth1`. Confirm the stock eth1 offset before making a permanent
 DTS. The installed image already uses offsets 1, 2 and 3 for eth0 and the
 radios; offset 0 is unverified and may already serve another stock function.
@@ -109,8 +109,34 @@ branch changes the installed slot.
   `r8152` transmit timeouts. The Ethernet link stayed negotiated at 2.5
   Gb/s. This run does not qualify sustained throughput or identify whether
   the USB adapter, port, cable or power path failed.
+- The RTL8156B subsequently failed USB enumeration (`-110` and `-71`) even
+  after reconnecting it on another USB 3 port. With a separate 1 GbE USB
+  adapter plugged into the same RD15 jack, the link negotiated 1 Gb/s and
+  all five isolated pings succeeded. This verifies the YT8821's 1 Gb/s
+  fallback independently of the failed 2.5 GbE test partner.
 
 Before a persistent image, derive a stable `eth1` MAC from verified device
 data, decide the default network role, test 1 Gb/s fallback on this jack,
 repeat sustained traffic with a reliable 2.5 GbE partner, and validate
 reboot and rollback. The installed slot still has no PPE port 1 support.
+
+## Stage C: stable MAC candidate
+
+The `experiment/yt8821-stable-mac-ram-test` branch adds
+`nvmem-cells = <&base_macaddr 1>` to `eth1`. This deliberately reuses the
+already validated LAN MAC cell of `eth0`; it does not guess a new offset or
+embed a per-unit address. It is suitable for a future LAN bridge, but while
+`eth1` remains separate it must stay on an isolated test subnet and must
+not share an upstream Ethernet segment with `eth0`/`lan1`–`lan3`.
+Boot this variant from RAM first. Verify `addr_assign_type=0` and equality
+between `eth0` and `eth1` without printing the address. Then repeat link,
+traffic and gigabit-switch checks. This branch is not an installation
+approval or a network-default change.
+
+The Stage C source compiled on 12 October 2026. The generated initramfs FIT
+is 16,049,856 bytes (SHA-256
+`d5a273a1538e055aecbaf3a322d3111a7bc32d733560afb0eb93c1ee649d7747`).
+The generated DTB contains `nvmem-cells` and `nvmem-cell-names` on Ethernet
+port 1, and the kernel has `CONFIG_MOTORCOMM_PHY=y`. **Stage C has not been
+booted or installed**; the tested RD15 was returned to its existing slot-0
+image after the Stage B tests.
