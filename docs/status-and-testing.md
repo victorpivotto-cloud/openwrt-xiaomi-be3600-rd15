@@ -146,4 +146,14 @@ The upstream gateway logged DHCPACK for the phone on both bands. For its
 90 seconds. This is another sign of intermittent initial forwarding trouble
 despite the eventual high throughput. See [ap-deployment.md](ap-deployment.md).
 
+At a second position about 6 m from the AP, behind a partition and a roughly
+70 cm wide MDF wardrobe/closet, the same phone remained on the RD15's 5 GHz
+BSSID. A new Speedtest reported **624/479 Mb/s** and 20 ms idle latency;
+the scanner showed −29 dBm and an 864 Mb/s link rate. This test selected
+RecantoNet in Santa Maria rather than the earlier Vtal server, so the two
+rates do not isolate distance loss. The owner reported that reconnection
+felt quick. Gateway logs show an immediate DHCPREQUEST/ACK for the existing
+`192.168.1.82` lease at 11:20:50, which does not prove that a first lease
+for a new client will be quick.
+
 Not measured: direct Wi-Fi↔LAN bridge throughput, simultaneous clients, WAN routing, long-term 2.5 GbE stability, WPA3, MLO or real-world roaming. See [limitations.md](limitations.md).
