@@ -137,8 +137,9 @@ scanner screenshots: `[redacted BSSID]` on 5 GHz `AP-5G` (channel 36, 80 MHz)
 and `[redacted BSSID]` on 2.4 GHz `AP-2G` (channel 11, 20 MHz). Ookla
 Speedtest reported **666/520 Mb/s** download/upload and 10 ms idle latency
 on 5 GHz, and **126/81.6 Mb/s** and 11 ms idle latency on 2.4 GHz. The two
-tests used different Internet test servers, so the numbers are field results,
-not a controlled radio comparison or a measurement of bridged LAN capacity.
+tests displayed the same server A Internet test server in an undisclosed location. They
+are field results, not a controlled radio comparison or a measurement of
+bridged LAN capacity.
 
 The upstream gateway logged DHCPACK for the phone on both bands. For its
 5 GHz connection, however, multiple DHCPOFFERs preceded DHCPACK by roughly
