@@ -11,6 +11,7 @@ This is an experimental port tested on one Xiaomi BE3600 2.5G **RD15**. It is no
 - The 2.4 GHz test used one MediaTek MT7922 client. With that client's Bluetooth enabled, its Wi-Fi fell to one spatial stream and throughput varied widely. A second client has not confirmed the 2.4 GHz results.
 - Ethernet flow control fixed a router-to-PC bottleneck on one link. With multiple Ethernet clients, pause frames could delay unrelated traffic; this has not been measured.
 - Direct Wi-Fi-to-LAN bridge throughput, multi-client load, long uptime, WPA3, MLO and assisted roaming have not been validated.
+- During the first household deployment, a 5 GHz client authenticated but initially received no DHCP offer over the bridge, although the gateway sent one. Temporarily removing and rejoining the unplugged LAN ports restored forwarding; one later cold boot with radios enabled worked. The root cause and recurrence risk are not yet known. See [ap-deployment.md](ap-deployment.md).
 - No public binary is provided: locally built images include proprietary Wi-Fi files. Do not commit or upload build outputs.
 
 If you cannot reach a U-Boot prompt, boot the RAM image, or identify your flash layout exactly, stop before writing flash. See [recovery-and-rollback.md](recovery-and-rollback.md).
