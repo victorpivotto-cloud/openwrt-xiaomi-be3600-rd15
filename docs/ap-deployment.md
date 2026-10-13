@@ -86,6 +86,14 @@ seconds before its ACK. Good throughput after association does not resolve
 the initial forwarding fault. Both screenshots show the same server A Internet
 test server in an undisclosed location.
 
+At a second household position roughly 6 m away, with a partition and an
+MDF closet/wardrobe between client and AP, the same phone stayed on the RD15
+5 GHz BSSID and measured 624/479 Mb/s and 20 ms idle latency. The user
+reported a quick reconnection; the gateway logged an immediate DHCP renewal
+for the phone's existing lease. The test used a different Internet server
+than the near-AP result, and a quick renewal does not validate first-lease
+behavior for another client.
+
 Direct bridged throughput, multiple clients and roaming in the final room
 still require testing. Keep the former AP intact and do not rely on this RD15
 as the sole access point until the forwarding fault is understood and fixed.
