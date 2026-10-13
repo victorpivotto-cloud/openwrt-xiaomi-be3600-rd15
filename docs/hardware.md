@@ -22,9 +22,25 @@ output and a running unit. "Observed" means seen on one unit only.
 
 The console is a 1.8 V UART. A 3.3 V or 5 V adapter can damage the SoC.
 Connect GND, router TX → adapter RX and router RX → adapter TX; leave VCC
-unconnected. This repository does not document pad positions: identify them
-on your own board with a meter and a logic-level-safe probe before
-connecting the adapter's TX.
+unconnected. On the one RD15 board photographed below, the four pads are
+beside the GigDevice chip at the PCB corner. In the **orientation shown in
+the photo**, top to bottom:
+
+| Pad | Photo wire | Observed function | Evidence |
+|---|---|---|---|
+| 1 | Blue | Router TX, 1.8 V logic | Boot output received by the adapter |
+| 2 | Orange | GND | Continuity to the 1 GbE port shields |
+| 3 | Brown | Router RX, 1.8 V logic | Adapter TX interrupted autoboot and reached `IPQ5332#` |
+| 4 | Green | **Unidentified** | No confirmed serial function; it may be a supply pin, but this was not verified |
+
+![Annotated UART pads on the tested RD15 board](images/rd15-uart-pinout.png)
+
+[Original, unannotated photograph](images/rd15-uart-original.jpg). The
+annotation was generated from that photograph and checked against the UART
+test log; use the original to inspect the actual solder pads. These are
+observations on **one board**, not a guarantee for every hardware revision.
+Verify GND and logic voltage on your unit with a meter before connecting.
+**Do not connect pad 4 or the adapter VCC.**
 
 The stock firmware ships with the console and the autoboot interrupt
 **disabled** (`uart_en=0`, `boot_wait=off` in Xiaomi nvram); U-Boot then
