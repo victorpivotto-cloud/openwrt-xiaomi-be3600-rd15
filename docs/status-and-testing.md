@@ -94,4 +94,20 @@ management pings succeeded, and HTTP returned 200. A separate source branch
 with a stable-MAC candidate compiled but was not booted or installed; see
 [yt8821-ram-test.md](yt8821-ram-test.md).
 
+## Three cold boots with the intended AP profile, 13 October 2026
+
+The tested unit was powered off and on three times with a Home Assistant
+smart plug. Each off interval exceeded ten seconds; loss of Ethernet carrier
+and management ping confirmed that the unit was actually off. The serial
+adapter stayed attached but was not used to start or recover any boot.
+
+All three boots returned autonomously to the installed OpenWrt slot 0 with
+`flag_boot_success=1` and no failed-slot counters. The tested `lan2` port
+linked at 1 Gb/s. Management ping probes completed without loss (10/10,
+5/5 and 10/10), and the HTTP interface returned 200. The home SSIDs remained
+disabled; DHCP and RA services remained off. A final check found 36,912 KiB
+MemAvailable, 8,408 KiB free overlay space and zero UBI bad PEBs. The unit
+was left powered on and isolated from the household LAN pending a physical
+AP swap. See [ap-deployment.md](ap-deployment.md).
+
 Not measured: direct Wi-Fi↔LAN bridge throughput, simultaneous clients, WAN routing, long-term 2.5 GbE stability, WPA3, MLO or real-world roaming. See [limitations.md](limitations.md).
