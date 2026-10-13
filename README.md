@@ -58,6 +58,7 @@ is open for technical findings and focused test results.
 | [docs/recovery-and-rollback.md](docs/recovery-and-rollback.md) | Back to Xiaomi with and without SSH, restoring slot 0, what never to write |
 | [docs/status-and-testing.md](docs/status-and-testing.md) | Test log and measurements |
 | [docs/stock-firmware-findings.md](docs/stock-firmware-findings.md) | What the Xiaomi 1.0.87 image reveals about PHYs, Wi-Fi memory and forwarding |
+| [docs/related-ipq5332-findings.md](docs/related-ipq5332-findings.md) | Relevance of Acer T7 and Flint 3 forum findings to the RD15 |
 | [docs/limitations.md](docs/limitations.md) | Known problems, risks and open work |
 | [docs/changes.md](docs/changes.md) | What every change in this port does and why |
 | [docs/ap-deployment.md](docs/ap-deployment.md) | Tested 1 GbE AP handoff, post-install checks and recovery limits |
