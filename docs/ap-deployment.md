@@ -78,6 +78,13 @@ pings. The unplugged ports were returned to the bridge and connectivity
 remained up. This is a runtime workaround, **not a proven fix**; the root
 cause and behavior for the next new client remain unknown.
 
+A subsequent phone test in the bedroom reached 666/520 Mb/s through the
+RD15's 5 GHz BSSID and 126/81.6 Mb/s through its 2.4 GHz BSSID in Internet
+speed tests. Both connections eventually received DHCP from the household
+gateway, but the 5 GHz connection had repeated DHCP OFFERs for about 90
+seconds before its ACK. Good throughput after association does not resolve
+the initial forwarding fault. The two tests used different Internet servers.
+
 Direct bridged throughput, multiple clients and roaming in the final room
 still require testing. Keep the former AP intact and do not rely on this RD15
 as the sole access point until the forwarding fault is understood and fixed.

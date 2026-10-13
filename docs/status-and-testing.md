@@ -1,6 +1,9 @@
 # Status and measured tests
 
-All results below are from **one RD15** in an isolated bench setup. Rates are application throughput from `iperf3`, not PHY negotiation rates. The router itself was the other `iperf3` endpoint; direct bridged Wi-Fi↔LAN throughput remains unmeasured.
+The bench results below are from **one RD15** in an isolated setup. Bench
+rates are application throughput from `iperf3`, not PHY negotiation rates.
+The router itself was the other `iperf3` endpoint; direct bridged Wi-Fi↔LAN
+throughput remains unmeasured. A separate household phone test appears below.
 
 ## Installed version and independent build
 
@@ -126,5 +129,20 @@ the client then obtained DHCP and passed 10/10 gateway and 3/3 Internet
 pings. The cause remains open and the link cycle is only a workaround.
 Details are in
 [ap-deployment.md](ap-deployment.md).
+
+## Household phone Internet test, 13 October 2026
+
+The owner's Samsung phone was confirmed on this RD15's BSSIDs by Wi-Fi
+scanner screenshots: `52:88:11:b3:59:ef` on 5 GHz `902` (channel 36, 80 MHz)
+and `52:88:11:b3:59:ee` on 2.4 GHz `MOV` (channel 11, 20 MHz). Ookla
+Speedtest reported **666/520 Mb/s** download/upload and 10 ms idle latency
+on 5 GHz, and **126/81.6 Mb/s** and 11 ms idle latency on 2.4 GHz. The two
+tests used different Internet test servers, so the numbers are field results,
+not a controlled radio comparison or a measurement of bridged LAN capacity.
+
+The upstream gateway logged DHCPACK for the phone on both bands. For its
+5 GHz connection, however, multiple DHCPOFFERs preceded DHCPACK by roughly
+90 seconds. This is another sign of intermittent initial forwarding trouble
+despite the eventual high throughput. See [ap-deployment.md](ap-deployment.md).
 
 Not measured: direct Wi-Fi↔LAN bridge throughput, simultaneous clients, WAN routing, long-term 2.5 GbE stability, WPA3, MLO or real-world roaming. See [limitations.md](limitations.md).
