@@ -2,6 +2,14 @@
 
 Keep a verified 1.8 V UART and private flash backups until several cold boots have passed. The fallback relies on the second Xiaomi slot remaining intact; a factory reset is not a flash backup.
 
+The tested unit subsequently passed three cold boots without serial input.
+If the owner removes the UART wiring to close the case, software recovery
+through SSH remains possible only while OpenWrt boots and the LAN is
+reachable. Serial/U-Boot recovery will require reopening the case and
+reconnecting a 1.8 V adapter. Image upgrades through LuCI/sysupgrade are
+still unsupported on this port; a configuration backup is not a firmware
+image or a flash backup.
+
 ## OpenWrt is reachable
 
 `rd15-slot boot-stock` selects the Xiaomi slot and reboots. Run it only while the RD15 is isolated: stock Xiaomi firmware may start its own DHCP service. Check UART for `os_idx = 1` and `ubi.mtd=rootfs_1`, then verify the stock web interface. Do not erase slot 0 to perform this rollback.
