@@ -1,9 +1,9 @@
 # 1 GbE AP deployment on the tested RD15
 
 The installed OpenWrt slot 0 is configured as a bridged access point for
-the owner's household LAN. This page records a **tested predeployment
-state**, not a claim that the physical swap has happened. The tested unit
-passed three cold boots on 13 October 2026 without serial intervention.
+the owner's household LAN. The physical swap from the former bedroom AP
+was performed on 13 October 2026. The unit had passed three cold boots in
+the isolated bench setup without serial intervention.
 
 ## Prepared configuration
 
@@ -46,6 +46,31 @@ passed three cold boots on 13 October 2026 without serial intervention.
 The owner's private deployment report contains the exact local helper
 commands and the private configuration backup. Do not upload those backups,
 Wi-Fi passwords, device calibration or serial logs to this repository.
+
+## Initial household-LAN result, 13 October 2026
+
+The household cable was connected to the previously tested `lan2` jack.
+OpenWrt returned on slot 0, the link negotiated 1 Gb/s and management
+answered on `192.168.1.4` (five of five pings and HTTP 200). DHCP/RA
+services on the RD15 stayed off. After enabling the radios, both prepared
+SSIDs were visible; the 5 GHz BSSID joined the other APs' `usteer` view.
+
+The **first** pinned 5 GHz client connection authenticated but received no
+DHCP lease. The household gateway logged DISCOVER and OFFER, while a
+temporary static-IP client reached the RD15 itself but could not reach the
+gateway. Temporarily removing and restoring the two unplugged LAN ports
+from `br-lan` made the return path work. The gateway then issued DHCPACK,
+and the client reached the gateway and an Internet IP through the RD15.
+This observation identifies a **transient bridge/switch forwarding issue**;
+its root cause is not established. The client retained connectivity through
+a Wi-Fi reload. A later cold power cycle with the radios enabled returned
+to slot 0 and the pinned 5 GHz client obtained DHCP immediately, with
+10/10 gateway and 5/5 Internet pings.
+
+The 2.4 GHz client path, direct bridged throughput, multiple clients and
+roaming in the final room still require testing. Keep the former AP intact
+until those checks and longer observation pass. Do not treat one successful
+cold boot as proof that the initial forwarding issue cannot recur.
 
 ## Upgrade and recovery boundary
 
