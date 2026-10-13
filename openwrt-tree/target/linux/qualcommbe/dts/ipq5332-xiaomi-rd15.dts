@@ -301,14 +301,16 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		/* RAM test B: standalone 2.5G jack, not added to br-lan. Omit a
-		 * board MAC until the stock eth1 offset has been confirmed; the
-		 * driver assigns a random MAC for this isolated test.
+		/* RAM test C: standalone 2.5G jack, not added to br-lan. Use
+		 * the already validated LAN MAC cell shared by eth0. Keep this
+		 * interface on a separate test subnet while it is unbridged.
 		 */
 		port@1 {
 			reg = <1>;
 			phy-mode = "sgmii";
 			label = "eth1";
+			nvmem-cells = <&base_macaddr 1>;
+			nvmem-cell-names = "mac-address";
 			phy-handle = <&yt8821>;
 			pcs-handle = <&pcs0_ch0>;
 			clocks = <&nsscc NSS_CC_PORT1_MAC_CLK>,
