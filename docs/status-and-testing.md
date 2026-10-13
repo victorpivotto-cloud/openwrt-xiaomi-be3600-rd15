@@ -66,4 +66,22 @@ overlay space stayed within 8,408–8,412 KiB. The temporary route was removed
 at the end. Wireless settings were restored and hash-checked, and no RD15 AP
 remained active.
 
-Not measured: direct Wi-Fi↔LAN bridge throughput, simultaneous clients, WAN routing, 2.5 GbE, WPA3, MLO or real-world roaming. See [limitations.md](limitations.md).
+## Experimental 2.5 GbE RAM boot, 12 October 2026
+
+An experimental initramfs with `CONFIG_MOTORCOMM_PHY` identified PHY
+`0x4f51ea19` at MDIO address `0x07` as YT8821. A second RAM-only image
+connected PPE port 1 to that PHY. Its `eth1` interface negotiated
+**2.5 Gb/s full duplex** with a RTL8156B USB adapter. In an isolated local
+`iperf3` test, one stream reached 1.68 Gb/s PC→RD15 and 2.34 Gb/s
+RD15→PC; four streams reached 2.35 Gb/s PC→RD15 with zero TCP
+retransmissions. The PHY and Ethernet port are functional on this unit.
+
+A four-stream RD15→PC run stalled after three seconds. The PC then logged
+USB read timeouts (`-110`), SuperSpeed reset attempts and `r8152` transmit
+timeouts, while RD15 `eth1` stayed at 2.5 Gb/s with zero RX/TX errors and
+drops. The USB adapter, its connection and power need separate validation.
+These images were booted from RAM only; the installed slot still omits
+the 2.5 GbE port. A stable device-tree MAC and persistent network setup
+must be validated before installation.
+
+Not measured: direct Wi-Fi↔LAN bridge throughput, simultaneous clients, WAN routing, long-term 2.5 GbE stability, WPA3, MLO or real-world roaming. See [limitations.md](limitations.md).
