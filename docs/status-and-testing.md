@@ -156,4 +156,22 @@ felt quick. Gateway logs show an immediate DHCPREQUEST/ACK for the existing
 `192.0.2.82` lease at 11:20:50, which does not prove that a first lease
 for a new client will be quick.
 
-Not measured: direct Wi-Fi↔LAN bridge throughput, simultaneous clients, WAN routing, long-term 2.5 GbE stability, WPA3, MLO or real-world roaming. See [limitations.md](limitations.md).
+## Three-day household AP observation, 13–16 October 2026
+
+All 73 periodic checks reached the RD15, and both radios remained active.
+One reboot occurred between hourly checks on 14 October; the cause is
+unconfirmed. The final boot remained stable for more than 36 hours, with
+`lan2` at 1 Gb/s, no Ethernet RX/TX errors, about 33 MiB available memory,
+and no UBI bad blocks. Local DHCP/RA services stayed disabled.
+
+Real use exposed intermittent client onboarding and roaming: repeated
+gateway DHCP OFFERs before ACK, one phone temporarily without IPv4 after
+FT roaming, and a projector that reconnected repeatedly before later
+streaming video normally. FT key-addition errors occurred on other
+household APs too. No single root cause has been established; see
+[ap-deployment.md](ap-deployment.md) for the observation limits and next
+diagnostic steps. This image remains experimental as a household AP.
+
+Not measured: controlled direct Wi-Fi↔LAN bridge throughput, WAN routing,
+long-term 2.5 GbE stability, WPA3, MLO or controlled real-world roaming.
+See [limitations.md](limitations.md).

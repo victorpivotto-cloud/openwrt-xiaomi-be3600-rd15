@@ -94,9 +94,38 @@ for the phone's existing lease. The test used a different Internet server
 than the near-AP result, and a quick renewal does not validate first-lease
 behavior for another client.
 
-Direct bridged throughput, multiple clients and roaming in the final room
-still require testing. Keep the former AP intact and do not rely on this RD15
-as the sole access point until the forwarding fault is understood and fixed.
+Controlled direct bridged throughput and roaming tests in the final room
+remain open. Keep the former AP available for rollback while the forwarding
+fault remains unexplained.
+
+## Three-day household observation, 13–16 October 2026
+
+The AP was reachable at all 73 hourly checks (3/3 ICMP probes each); these
+checks do not establish uninterrupted availability between samples. One
+reboot was observed between two checks on 14 October; its cause was not
+confirmed. Afterward the AP stayed on the same boot through the final check.
+The `lan2` uplink remained up at 1 Gb/s, with zero recorded RX/TX errors.
+Both SSIDs stayed active and clients used both bands. Available memory in
+the periodic samples ranged from about 31 to 36 MiB, the overlay had about
+8.2 MiB free, and UBI reported no bad physical eraseblocks. Local DHCP and
+RA services stayed disabled.
+
+Client onboarding and roaming remained intermittent. A phone associated by
+802.11r FT but temporarily had no IPv4 connectivity while the upstream
+gateway logged repeated DHCP DISCOVER/OFFER without REQUEST/ACK; a normal
+reassociation restored service. A 2.4 GHz client without FT and a projector
+on 5 GHz also experienced repeated offers before successful connections.
+The projector later streamed video normally. FT key-addition errors were
+also seen on the other household APs, so this is not established as an RD15
+driver-only issue. Repeated gateway offers do not identify the failing hop,
+and a lease renewal is different from an initial grant. An isolated
+`lan2 rx_dropped` increase is not proof of client packet loss.
+
+The AP remained in service at the end of the observation, booted from the
+installed OpenWrt slot 0 with the boot-success flag set. Next diagnostic
+work is to capture DHCP/ARP on both sides of the bridge during a reproduced
+failure and run a controlled FT A/B test. Neither the fault nor 2.5 GbE
+support is resolved by this household observation.
 
 ## Upgrade and recovery boundary
 
