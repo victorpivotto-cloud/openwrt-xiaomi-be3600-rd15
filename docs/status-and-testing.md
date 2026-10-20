@@ -116,7 +116,7 @@ AP swap. See [ap-deployment.md](ap-deployment.md).
 ## First household deployment, 13 October 2026
 
 The tested unit moved to the household LAN as a 1 GbE bridge AP at
-`192.0.2.4`. Both SSIDs came up. A pinned 5 GHz client authenticated but
+its configured management address. Both SSIDs came up. A pinned 5 GHz client authenticated but
 the initial gateway DHCP OFFER did not reach it; even with a static IP it
 could reach only the AP. Rejoining the two unplugged LAN ports to `br-lan`
 after temporarily removing them restored forwarding. After that, DHCPACK,
@@ -133,11 +133,11 @@ Details are in
 ## Household phone Internet test, 13 October 2026
 
 The owner's Samsung phone was confirmed on this RD15's BSSIDs by Wi-Fi
-scanner screenshots: the RD15's 5 GHz `AP-5G` BSSID (channel 36, 80 MHz)
-and its 2.4 GHz `AP-2G` BSSID (channel 11, 20 MHz). Ookla
+scanner screenshots: the RD15's 5 GHz BSSID (channel 36, 80 MHz)
+and its 2.4 GHz BSSID (channel 11, 20 MHz). Actual SSIDs and BSSIDs are omitted. Ookla
 Speedtest reported **666/520 Mb/s** download/upload and 10 ms idle latency
 on 5 GHz, and **126/81.6 Mb/s** and 11 ms idle latency on 2.4 GHz. The two
-tests displayed the same server A Internet test server in an undisclosed location. They
+tests displayed the same Internet test server; its operator and location are omitted. They
 are field results, not a controlled radio comparison or a measurement of
 bridged LAN capacity.
 
@@ -150,10 +150,10 @@ At a second position about 6 m from the AP, behind a partition and a roughly
 70 cm wide MDF wardrobe/closet, the same phone remained on the RD15's 5 GHz
 BSSID. A new Speedtest reported **624/479 Mb/s** and 20 ms idle latency;
 the scanner showed −29 dBm and an 864 Mb/s link rate. This test selected
-server B in an undisclosed location rather than the earlier server A server, so the two
+another Internet test server rather than the earlier one, so the two
 rates do not isolate distance loss. The owner reported that reconnection
 felt quick. Gateway logs show an immediate DHCPREQUEST/ACK for the existing
-`192.0.2.82` lease at 11:20:50, which does not prove that a first lease
+client lease, which does not prove that a first lease
 for a new client will be quick.
 
 ## Three-day household AP observation, 13–16 October 2026

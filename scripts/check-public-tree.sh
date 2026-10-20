@@ -58,6 +58,12 @@ for rel in paths:
             continue  # The scanner necessarily contains its own detection strings.
         if pat.search(content):
             errors.append(f'{rel}: possible {label}')
+    if rel.suffix == '.md':
+        if re.search(r'\b[A-Za-z0-9._%+-]+@(?:gmail|hotmail|outlook|yahoo|icloud)\.[A-Za-z.]+', content, re.I):
+            errors.append(f'{rel}: possible personal email address')
+        if rel.name in {'ap-deployment.md', 'status-and-testing.md'} and re.search(
+                r'\b(?:10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2})\b', content):
+            errors.append(f'{rel}: use documentation-only example addresses for deployment details')
 
 if errors:
     print('Public-tree audit failed:', file=sys.stderr)

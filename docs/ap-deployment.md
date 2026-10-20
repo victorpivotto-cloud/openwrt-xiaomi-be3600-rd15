@@ -7,7 +7,8 @@ the isolated bench setup without serial intervention.
 
 ## Prepared configuration
 
-- Static management address: `192.0.2.4/24`, gateway/DNS `192.0.2.1`.
+- Example management address: `192.0.2.4/24`, gateway/DNS `192.0.2.1`.
+  Addresses below use a documentation-only subnet; substitute your own LAN.
 - Bridge: `lan1`, `lan2`, `lan3`. The `lan2` jack was used for the 1 GbE
   endurance and cold-boot checks. The 2.5 GbE jack is not enabled in the
   installed image.
@@ -32,7 +33,7 @@ the isolated bench setup without serial intervention.
    household LAN to the same physical 1 GbE jack that held the tested
    bench adapter (`lan2`). Do not use the 2.5 GbE jack and do not leave the
    PC bench cable connected at the same time.
-3. Power on. After boot, confirm `192.0.2.4` answers from the household
+3. Power on. After boot, confirm the configured management address answers from the household
    LAN and the link is 1 Gb/s. Confirm OpenWrt slot 0 is marked good,
    `dnsmasq`/`odhcpd` remain stopped, and no new DHCP server appeared.
 4. Only then enable the two AP interfaces. Verify client association,
@@ -51,7 +52,7 @@ Wi-Fi passwords, device calibration or serial logs to this repository.
 
 The household cable was connected to the previously tested `lan2` jack.
 OpenWrt returned on slot 0, the link negotiated 1 Gb/s and management
-answered on `192.0.2.4` (five of five pings and HTTP 200). DHCP/RA
+answered on its configured management address (five of five pings and HTTP 200). DHCP/RA
 services on the RD15 stayed off. After enabling the radios, both prepared
 SSIDs were visible; the 5 GHz BSSID joined the other APs' `usteer` view.
 
@@ -67,7 +68,7 @@ a Wi-Fi reload. A later cold power cycle with the radios enabled returned
 to slot 0 and the pinned 5 GHz client obtained DHCP immediately, with
 10/10 gateway and 5/5 Internet pings.
 
-The forwarding issue **recurred** with the first pinned 2.4 GHz `AP-2G` client
+The forwarding issue **recurred** with the first pinned 2.4 GHz client
 after that cold boot. Association succeeded, but the gateway repeatedly
 logged DHCP DISCOVER/OFFER without ACK. With a temporary static IP, the
 client reached the RD15 but not the gateway. Removing the two unplugged
@@ -83,8 +84,8 @@ RD15's 5 GHz BSSID and 126/81.6 Mb/s through its 2.4 GHz BSSID in Internet
 speed tests. Both connections eventually received DHCP from the household
 gateway, but the 5 GHz connection had repeated DHCP OFFERs for about 90
 seconds before its ACK. Good throughput after association does not resolve
-the initial forwarding fault. Both screenshots show the same server A Internet
-test server in an undisclosed location.
+the initial forwarding fault. Both screenshots show the same Internet
+test server; its operator and location are omitted.
 
 At a second household position roughly 6 m away, with a partition and an
 MDF closet/wardrobe between client and AP, the same phone stayed on the RD15
