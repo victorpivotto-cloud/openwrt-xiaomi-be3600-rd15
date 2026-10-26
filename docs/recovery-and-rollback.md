@@ -6,9 +6,9 @@ The tested unit subsequently passed three cold boots without serial input.
 If the owner removes the UART wiring to close the case, software recovery
 through SSH remains possible only while OpenWrt boots and the LAN is
 reachable. Serial/U-Boot recovery will require reopening the case and
-reconnecting a 1.8 V adapter. Image upgrades through LuCI/sysupgrade are
-still unsupported on this port; a configuration backup is not a firmware
-image or a flash backup.
+reconnecting a 1.8 V adapter. Existing-image updates through the guarded RD15 LuCI/sysupgrade path have
+been tested; see [upgrading.md](upgrading.md). A configuration backup is not
+a firmware image or a flash backup.
 
 ## OpenWrt is reachable
 
@@ -23,3 +23,13 @@ Use the serial console to inspect the bootloader's slot selection and boot messa
 If both slots are damaged, restoration requires **your own** verified backups and board-specific flash access. This repository does not contain Xiaomi images, ART, bdata or a whole-flash image. Never write another unit's `ART`, `bdata`, MIBIB or APPSBL. The public scripts intentionally have no command that writes those partitions.
 
 The tested unit's original slot-0 FIT was privately backed up before development. A later no-`pause` FIT was rebuilt as an approximate rollback artifact, but it was **not** tested on the device and is not included here. Preserve your own known-good image instead.
+
+## Boot-environment errors
+
+The current envtools patch programs NAND in page-sized operations, skips
+erased data pages and verifies the block afterward. An error or invalid CRC
+must be investigated before another reboot. Preserve a private read-only
+copy of the current partition and use only the verified backup from that
+same device. Do not reset to a generic environment or use another unit's
+backup. The one-unit recovery in [the update record](update-2026-10-26.md)
+is evidence, not a generic flash-repair recipe.

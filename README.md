@@ -17,6 +17,18 @@ no Xiaomi/Qualcomm binaries**. The Wi-Fi firmware and board data the radios
 need are copied by you, from the official Xiaomi firmware for your own device,
 into your local build tree ([docs/vendor-firmware.md](docs/vendor-firmware.md)).
 
+## Current tested state — 26 October 2026
+
+Two image updates through the LuCI interface in Chrome completed on the test
+unit, keeping its settings. The current image includes the DHCP/FDB fix,
+blue/orange PWM status LED, safe airtime/AQL handling, per-pool TX exhaustion
+counters, key-install errno diagnostics and page-based NAND environment writes
+with readback. Automatic boot-success marking passed after the final update.
+
+See [the update record](docs/update-2026-10-26.md),
+[upgrading an existing installation](docs/upgrading.md) and
+[completed work and open improvements](docs/roadmap.md).
+
 ## What works (measured on one unit, October 2026)
 
 | Area | State |
@@ -26,19 +38,22 @@ into your local build tree ([docs/vendor-firmware.md](docs/vendor-firmware.md)).
 | Wi-Fi 2.4 GHz | AP, WPA2-PSK, HE20; ~131/~95 Mb/s TCP with a 2×2 client whose Bluetooth was off |
 | Wi-Fi 5 GHz | AP, WPA2-PSK, HE80; ~390/~495 Mb/s in short tests, but only 149/234 Mb/s median over a 15-hour test with one 2×2 client. Ping stayed lossless; roaming not measured |
 | Storage | SquashFS root + UBIFS overlay in the stock UBI volumes |
+| Existing-image updates | Guarded RD15 sysupgrade through LuCI, tested in Chrome with settings retained and payload readback |
+| Status LED | Native PWM: blue when boot completes, orange for boot/failsafe/upgrade; blue/white appearance confirmed |
+| Boot environment | Page-based NAND writes with readback; automatic slot-success update and independent CRC check passed |
 | Fallback | `rd15-slot boot-stock` returns to the Xiaomi slot; Xiaomi can switch back to OpenWrt |
 | Memory | ~35 MB available with both radios up, flat over a 10-minute load |
 
 In household AP use, a Samsung phone reached **666/520 Mb/s** on 5 GHz near
 the AP, **624/479 Mb/s** about 6 m away behind a partition and MDF closet,
 and **126/81.6 Mb/s** on 2.4 GHz. These are Internet Speedtests, not bridged
-LAN benchmarks. Initial DHCP forwarding has failed or been delayed for new
-clients even when later throughput was good; see
-[docs/ap-deployment.md](docs/ap-deployment.md). The AP remains under
-observation and is not qualified as the sole household access point.
+LAN benchmarks. The initial DHCP forwarding failure was later reproduced as stale hardware
+FDB state and corrected in the port; controlled first-lease tests passed.
+Long-term behavior and FT roaming remain under observation; see
+[docs/ap-deployment.md](docs/ap-deployment.md).
 
-Not supported in the installed image: the 2.5 GbE port, `sysupgrade`, the
-generated `factory.ubi`, MLO, WPA3 (untested). Details in
+Not supported or unqualified in the installed image: the 2.5 GbE port, the
+generated `factory.ubi`, MLO and WPA3 (untested). Details in
 [docs/status-and-testing.md](docs/status-and-testing.md).
 
 ## Community discussion
@@ -60,6 +75,9 @@ is open for technical findings and focused test results.
 | [docs/stock-firmware-findings.md](docs/stock-firmware-findings.md) | What the Xiaomi 1.0.87 image reveals about PHYs, Wi-Fi memory and forwarding |
 | [docs/related-ipq5332-findings.md](docs/related-ipq5332-findings.md) | Relevance of Acer T7 and Flint 3 forum findings to the RD15 |
 | [docs/limitations.md](docs/limitations.md) | Known problems, risks and open work |
+| [docs/upgrading.md](docs/upgrading.md) | Update an existing installation through LuCI |
+| [docs/update-2026-10-26.md](docs/update-2026-10-26.md) | LED, airtime, NAND environment correction and validation |
+| [docs/roadmap.md](docs/roadmap.md) | Completed improvements and remaining qualification |
 | [docs/changes.md](docs/changes.md) | What every change in this port does and why |
 | [docs/ap-deployment.md](docs/ap-deployment.md) | Tested 1 GbE AP handoff, post-install checks and recovery limits |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Evidence and privacy rules for issues and pull requests |

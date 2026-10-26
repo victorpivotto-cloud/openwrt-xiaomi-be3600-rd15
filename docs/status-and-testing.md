@@ -1,5 +1,10 @@
 # Status and measured tests
 
+**Latest installed state: 26 October 2026.** The guarded LuCI update, LED,
+airtime and NAND environment changes are described in
+[the update record](update-2026-10-26.md). Earlier dated sections below are
+historical measurements, not the current capability list.
+
 The bench results below are from **one RD15** in an isolated setup. Bench
 rates are application throughput from `iperf3`, not PHY negotiation rates.
 The router itself was the other `iperf3` endpoint; direct bridged Wi-Fi↔LAN
@@ -19,8 +24,9 @@ the generated `sha256sums` verified. The build reports the same revision and
 kernel version. Its initramfs FIT SHA-256 is
 `06a2ac76a44d1f2661259911d16b2d867b200847af5790da4461ade891fdd2e0`.
 These newly built images have **not** been booted or installed on the router.
-The generated `factory.ubi` and `sysupgrade.bin` remain unsupported
-installation paths; see [limitations.md](limitations.md).
+At that date, generated `factory.ubi` and `sysupgrade.bin` were unsupported
+installation paths. Existing-image sysupgrade was subsequently qualified;
+`factory.ubi` remains unqualified. See [upgrading.md](upgrading.md).
 
 | Link | PC → RD15 | RD15 → PC | Conditions |
 |---|---:|---:|---|

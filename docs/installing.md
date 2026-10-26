@@ -20,7 +20,7 @@ sha256sum xiaomi_rd15-uImage.itb root.squashfs
 sh /tmp/install-slot0.sh /tmp/xiaomi_rd15-uImage.itb FIT_SHA256 /tmp/root.squashfs SQUASHFS_SHA256
 ```
 
-Use the exact 64-character hashes you computed, not the placeholder words. The script writes the `kernel` and `ubi_rootfs` volumes in slot 0, reads them back and makes a `rootfs_data` UBIFS overlay. It preserves slot 1. Recreating `rootfs_data` removes existing OpenWrt settings on slot 0; restore your own backup after installation if needed. `factory.ubi` and `sysupgrade` have **not** been validated and must not replace this procedure.
+Use the exact 64-character hashes you computed, not the placeholder words. The script writes the `kernel` and `ubi_rootfs` volumes in slot 0, reads them back and makes a `rootfs_data` UBIFS overlay. It preserves slot 1. Recreating `rootfs_data` removes existing OpenWrt settings on slot 0; restore your own backup after installation if needed. `factory.ubi` remains unqualified. Updating an existing port installation through [LuCI](upgrading.md) is a separate procedure and must not replace this initial RAM installation.
 
 After the write, select slot 0 only if the readback succeeded and your stock fallback is verified. Observe the entire first boot on UART. Confirm `rd15-slot mark-good` has run before a cold power cycle, then check LAN, SSH, both radios and persistence. Safe image defaults leave DHCP, RA and Wi-Fi disabled after reset; provide a static management address on an isolated cable for initial configuration. The installed router in the development setup was subsequently configured as a bridge AP, not as an Internet gateway.
 

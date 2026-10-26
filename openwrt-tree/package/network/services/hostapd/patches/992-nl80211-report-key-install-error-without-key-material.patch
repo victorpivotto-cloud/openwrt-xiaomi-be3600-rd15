@@ -1,0 +1,17 @@
+nl80211: report key-install errno and key class at INFO without addresses or key data
+
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -4079,8 +4079,10 @@
+ 	if ((ret == -ENOENT || ret == -ENOLINK) && alg == WPA_ALG_NONE)
+ 		ret = 0;
+ 	if (ret)
+-		wpa_printf(MSG_DEBUG, "nl80211: set_key failed; err=%d %s",
+-			   ret, strerror(-ret));
++		wpa_printf(MSG_INFO,
++			   "nl80211: set_key failed err=%d (%s) alg=%d idx=%d pairwise=%d link_id=%d",
++			   ret, strerror(-ret), alg, key_idx,
++			   !!(key_flag & KEY_FLAG_PAIRWISE), link_id);
+ 
+ 	/*
+ 	 * If we failed or don't need to set the key as default (below),

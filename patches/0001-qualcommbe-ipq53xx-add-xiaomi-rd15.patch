@@ -1,18 +1,3 @@
-Subject: qualcommbe: ipq53xx: add Xiaomi BE3600 2.5G (RD15)
-
-Changes to files that already exist in fivefold3/openwrt-gl-be3600 at
-BASE_COMMIT (new files live under openwrt-tree/):
-
-- image/ipq53xx.mk: device xiaomi_rd15 (LZMA FIT, FIT config
-  config@mi04.1-c2 as requested by the stock bootmiwifi, UBI layout, kernel
-  size limited to the stock "kernel" UBI volume, uboot-envtools).
-- board.d/02_network: lan = lan1 lan2 lan3 (YT9215S DSA user ports).
-- hotplug.d/firmware/12-ath12k-caldata: reuse the GL-BE3600 ART offsets
-  (same AP-MI04.1-C2 reference board) for both radios.
-- config-default: build the backported yt921x DSA driver and tagger.
-
-SPDX-License-Identifier: GPL-2.0-only
----
 diff --git a/target/linux/qualcommbe/image/ipq53xx.mk b/target/linux/qualcommbe/image/ipq53xx.mk
 index b03277fc33..e4f0606d8f 100644
 --- a/target/linux/qualcommbe/image/ipq53xx.mk
@@ -79,13 +64,47 @@ index ef0e32e31e..08e9088c67 100644
  		# QCN6432 (5 GHz) block: offset 0x12800 and region 0x1b800 straight from
  		# ftm.conf ("ap-mi04.1-c2,0053,1,75776,112640,0"). Region-sized for the
  		# same reason as above (the tested unit's block is 0x18800).
+diff --git a/target/linux/qualcommbe/ipq53xx/base-files/lib/upgrade/platform.sh b/target/linux/qualcommbe/ipq53xx/base-files/lib/upgrade/platform.sh
+index 71a35a3e2a..01f7bcc27b 100644
+--- a/target/linux/qualcommbe/ipq53xx/base-files/lib/upgrade/platform.sh
++++ b/target/linux/qualcommbe/ipq53xx/base-files/lib/upgrade/platform.sh
+@@ -1,5 +1,5 @@
+ REQUIRE_IMAGE_METADATA=1
+-RAMFS_COPY_BIN='dumpimage fitblk fit_check_sign'
++RAMFS_COPY_BIN='dumpimage fitblk fit_check_sign head tail sha1sum sha256sum'
+ 
+ gl_be6500_remove_oem_rootfs() {
+ 	local mtdnum
+@@ -45,6 +45,9 @@ gl_remove_oem_wifi_fw() {
+ 
+ platform_do_upgrade() {
+ 	case "$(board_name)" in
++	xiaomi,rd15)
++		rd15_do_upgrade "$1" || nand_do_upgrade_failed
++		;;
+ 	gl.inet,gl-be3600)
+ 		CI_UBIPART="rootfs"
+ 		gl_be6500_remove_oem_rootfs || return 1
+@@ -76,6 +79,9 @@ platform_check_image() {
+ 	[ "$#" -gt 1 ] && return 1
+ 
+ 	case "$(board_name)" in
++	xiaomi,rd15)
++		rd15_verify_image "$1"
++		;;
+ 	gl.inet,gl-be3600)
+ 		# factory.bin is a QSDK container FIT (script node + the whole UBI).
+ 		# nand_do_platform_check deliberately ACCEPTS "fit" - on many NAND
 diff --git a/target/linux/qualcommbe/ipq53xx/config-default b/target/linux/qualcommbe/ipq53xx/config-default
-index 543a01e395..f1525581cb 100644
+index 543a01e395..e7f40a893e 100644
 --- a/target/linux/qualcommbe/ipq53xx/config-default
 +++ b/target/linux/qualcommbe/ipq53xx/config-default
-@@ -94,3 +94,5 @@ CONFIG_TOUCHSCREEN_HYNITRON_CST816X=y
+@@ -94,3 +94,8 @@ CONFIG_TOUCHSCREEN_HYNITRON_CST816X=y
  # ARMv8 Crypto Extensions for AES modes and GCM
  CONFIG_CRYPTO_AES_ARM64_CE_BLK=y
  CONFIG_CRYPTO_GHASH_ARM64_CE=y
 +CONFIG_NET_DSA_YT921X=y
 +CONFIG_NET_DSA_TAG_YT921X=y
++
++# RD15 status LED uses native PWM channels, available during preinit.
++CONFIG_LEDS_PWM=y

@@ -1,0 +1,42 @@
+ath12k: expose per-pool descriptor exhaustion without increasing low-memory pools
+
+--- a/drivers/net/wireless/ath/ath12k/dp.h
++++ b/drivers/net/wireless/ath/ath12k/dp.h
+@@ -507,6 +507,8 @@
+ 	struct list_head tx_desc_used_list[ATH12K_HW_MAX_QUEUES];
+ 	/* protects the free and used desc lists */
+ 	spinlock_t tx_desc_lock[ATH12K_HW_MAX_QUEUES];
++	/* Updated under tx_desc_lock; read with READ_ONCE in debugfs. */
++	u32 tx_desc_alloc_failed[ATH12K_HW_MAX_QUEUES];
+ 
+ 	struct dp_rxdma_ring rx_refill_buf_ring;
+ 	struct dp_srng rx_mac_buf_ring[MAX_RXDMA_PER_PDEV];
+--- a/drivers/net/wireless/ath/ath12k/dp_tx.c
++++ b/drivers/net/wireless/ath/ath12k/dp_tx.c
+@@ -103,8 +103,10 @@
+ 					struct ath12k_tx_desc_info,
+ 					list);
+ 	if (!desc) {
++		dp->tx_desc_alloc_failed[pool_id]++;
+ 		spin_unlock_bh(&dp->tx_desc_lock[pool_id]);
+-		ath12k_warn(dp->ab, "failed to allocate data Tx buffer\n");
++		ath12k_warn(dp->ab, "failed to allocate data Tx buffer pool=%u\n",
++			    pool_id);
+ 		return NULL;
+ 	}
+ 
+--- a/drivers/net/wireless/ath/ath12k/debugfs.c
++++ b/drivers/net/wireless/ath/ath12k/debugfs.c
+@@ -1168,6 +1168,12 @@
+ 	}
+ 	rcu_read_unlock();
+ 
++	len += scnprintf(buf + len, size - len, "\nTX descriptor allocation failures:");
++	for (i = 0; i < ATH12K_HW_MAX_QUEUES; i++)
++		len += scnprintf(buf + len, size - len, " %d:%u", i,
++				 READ_ONCE(dp->tx_desc_alloc_failed[i]));
++	len += scnprintf(buf + len, size - len, "\n");
++
+ 	len += scnprintf(buf + len, size - len, "\nREO Rx Received:\n");
+ 
+ 	for (i = 0; i < DP_REO_DST_RING_MAX; i++) {

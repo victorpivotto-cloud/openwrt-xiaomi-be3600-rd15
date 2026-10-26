@@ -1,5 +1,10 @@
 # 1 GbE AP deployment on the tested RD15
 
+**Update, 26 October:** the installed image contains the controlled DHCP/FDB
+fix and the LED/airtime/environment improvements. Read the dated observations
+below as history. Current qualification and open work are in
+[the update record](update-2026-10-26.md) and [roadmap](roadmap.md).
+
 The installed OpenWrt slot 0 is configured as a bridged access point for
 the owner's household LAN. The physical swap from the former bedroom AP
 was performed on 13 October 2026. The unit had passed three cold boots in
@@ -128,13 +133,32 @@ work is to capture DHCP/ARP on both sides of the bridge during a reproduced
 failure and run a controlled FT A/B test. Neither the fault nor 2.5 GbE
 support is resolved by this household observation.
 
+## Controlled DHCP/FDB follow-up, 19–20 October
+
+The failure was reproduced when a client had first been learned on the
+wired uplink and then moved to Wi-Fi. Bridge software learned the new
+location, while the switch hardware retained the old forwarding entry.
+The correction maps bridge VID 0 to the switch's VLAN-unaware FID 4095,
+preserves full-width register arguments and replaces a stale dynamic port
+when installing the static host/CPU entry. Existing static-entry merge is
+preserved. STP and MDB remapping were not changed.
+
+The candidate passed 14 complete DHCP DORA exchanges (11 on 5 GHz and three
+on 2.4 GHz); 13 had a dynamic hardware entry proven before association.
+Three further DORAs passed against the actual upstream household gateway.
+This validates the controlled stale-FDB path; it does not establish that
+every onboarding or FT issue has the same cause. VLAN-aware forwarding,
+hardware multicast and simultaneous multi-port behavior remain open.
+
 ## Upgrade and recovery boundary
 
-The generated `sysupgrade.bin` and `factory.ubi` are **not** supported
-installation paths. The installed `platform.sh` rejects `xiaomi,rd15`,
-and generic NAND sysupgrade would recreate the stock-compatible static
-`kernel` volume incorrectly. Configuration changes and backups work, but
-flashing another image through LuCI is not validated. After UART removal,
-serial recovery requires opening the case again. The stock Xiaomi slot 1
-remains a fallback, but it should be selected only with the household LAN
-disconnected because the stock firmware may run DHCP.
+Existing installations can use the guarded RD15 sysupgrade through LuCI;
+two interactive Chrome updates completed on 26 October, with settings
+retained and kernel/rootfs readback matching the input. The update does not
+recreate the fixed UBI volumes or write the stock slot. It is not an initial
+stock-to-OpenWrt path; `factory.ubi` remains unqualified.
+
+After UART removal, serial recovery requires opening the case again. The
+stock Xiaomi slot remains a fallback and should be selected only with the
+normal LAN disconnected because stock firmware may run DHCP. See
+[upgrading.md](upgrading.md) and [recovery-and-rollback.md](recovery-and-rollback.md).

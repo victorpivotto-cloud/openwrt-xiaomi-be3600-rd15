@@ -4,8 +4,67 @@
 # never become a DHCP/RA/DNS server there. It comes up as a bridge-only AP on
 # the bench address 192.168.31.1/24, Wi-Fi off (OpenWrt default), management
 # bound to that IPv4 only, SSH by key only.
-[ "$(cat /tmp/sysinfo/board_name 2>/dev/null)" = "xiaomi,rd15" ] || exit 0
-uci -q batch <<UCI
+#
+# The script comes back from /rom after every sysupgrade (rootfs_data is
+# emptied), including "keep settings" upgrades whose restored /etc/config
+# would otherwise be rewritten. So it only applies the defaults when there
+# is no marker. The marker lives in /etc/config, so it travels in the
+# keep-config backup and is gone after factory reset or sysupgrade -n.
+# See the port documentation for keep-settings migration checks.
+#
+# RD15_* overrides exist only for the test harness.
+ROM="${RD15_ROM:-/rom}"
+CONF="${RD15_CONF:-/etc/config}"
+SYSINFO="${RD15_SYSINFO:-/tmp/sysinfo}"
+INITD="${RD15_INITD:-/etc/init.d}"
+MARKER="$CONF/rd15_defaults"
+
+[ "$(cat "$SYSINFO/board_name" 2>/dev/null)" = "xiaomi,rd15" ] || exit 0
+
+log() { logger -t rd15-safe-defaults "$*" 2>/dev/null; echo "rd15-safe-defaults: $*" >&2; }
+
+marker_ok() {
+	# An image must never ship the marker, or fresh installs would skip the defaults.
+	[ -e "$ROM/etc/config/rd15_defaults" ] && { log "marker present in /rom, ignored"; return 1; }
+	grep -qx "[[:space:]]*option applied '1'" "$MARKER" 2>/dev/null
+}
+
+write_marker() {
+	printf "config state 'safe_defaults'\n\toption applied '1'\n" > "$MARKER.tmp" &&
+		mv "$MARKER.tmp" "$MARKER"
+}
+
+# <pkg.section.option> <value>: set to <value> in /etc/config and not by the
+# image defaults in /rom. If /rom is unavailable this cannot be decided: false.
+set_by_us() {
+	[ "$(uci -q -c "$CONF" get "$1")" = "$2" ] || return 1
+	[ -d "$ROM/etc/config" ] || return 1
+	[ "$(uci -q -c "$ROM/etc/config" get "$1")" != "$2" ]
+}
+
+# Units installed before the marker existed: their restored config already
+# carries this script's hardening. Every check must hold, otherwise the
+# defaults are applied (fail towards safe, not towards keeping config).
+migrated() {
+	set_by_us dhcp.lan.ignore 1 &&
+	set_by_us dhcp.lan.dhcpv4 disabled &&
+	set_by_us dhcp.lan.ra disabled &&
+	set_by_us 'dropbear.@dropbear[0].PasswordAuth' off &&
+	set_by_us 'dropbear.@dropbear[0].RootPasswordAuth' off
+}
+
+if marker_ok; then
+	log "marker found, keeping restored configuration"
+	exit 0
+fi
+if migrated; then
+	write_marker || { log "cannot write marker"; exit 1; }
+	log "configuration from a pre-marker install, kept; marker written"
+	exit 0
+fi
+
+log "no marker: applying safe defaults"
+uci -q -c "$CONF" batch <<UCI
 set network.lan.ipaddr='192.168.31.1/24'
 set network.lan.ipv6='0'
 delete network.lan.ip6assign
@@ -22,6 +81,14 @@ set dropbear.@dropbear[0].PasswordAuth='off'
 set dropbear.@dropbear[0].RootPasswordAuth='off'
 commit
 UCI
-/etc/init.d/dnsmasq disable
-/etc/init.d/odhcpd disable
+"$INITD/dnsmasq" disable
+"$INITD/odhcpd" disable
+
+# Marker last, and only once the safety-relevant values are really committed.
+[ "$(uci -q -c "$CONF" get network.lan.ipaddr)" = "192.168.31.1/24" ] &&
+[ "$(uci -q -c "$CONF" get dhcp.lan.ignore)" = 1 ] &&
+[ "$(uci -q -c "$CONF" get 'dropbear.@dropbear[0].PasswordAuth')" = off ] &&
+[ "$(uci -q -c "$CONF" get 'dropbear.@dropbear[0].RootPasswordAuth')" = off ] ||
+	{ log "defaults not committed, marker not written"; exit 1; }
+write_marker || { log "cannot write marker"; exit 1; }
 exit 0

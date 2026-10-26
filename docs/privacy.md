@@ -17,3 +17,9 @@ Fresh clones are recommended rather than merging old history back in.
 
 Private recovery bundles, credentials, firmware blobs, captures, calibration
 and original device logs are not distributed in this repository.
+
+The public defaults also omit the owner's chosen timezone and runtime AP
+profile. Manufacturer management defaults needed by the code are retained;
+documentation-only deployment addresses are examples. Built images and admin
+keys remain local inputs, so this source export is not a promise of bitwise
+identity with an owner's customized image.

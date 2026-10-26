@@ -1,0 +1,56 @@
+mac80211: handle unknown RU airtime safely and retain conservative AQL accounting
+
+--- a/net/mac80211/airtime.c
++++ b/net/mac80211/airtime.c
+@@ -512,6 +512,8 @@
+ 	int group, idx;
+ 	u32 duration;
+ 
++	*overhead = 0;
++
+ 	switch (status->bw) {
+ 	case RATE_INFO_BW_20:
+ 		bw = BW_20;
+@@ -528,6 +530,13 @@
+ 	case RATE_INFO_BW_320:
+ 		bw = BW_320;
+ 		break;
++	case RATE_INFO_BW_HE_RU:
++	case RATE_INFO_BW_EHT_RU:
++		/* RU allocations are valid rates, but these duration tables
++		 * only model full-channel transmissions. Report unknown
++		 * airtime instead of using a fabricated channel width.
++		 */
++		return 0;
+ 	default:
+ 		WARN_ON_ONCE(1);
+ 		return 0;
+@@ -770,6 +779,8 @@
+ 		return ieee80211_calc_rx_airtime(hw, &stat, len) * 1024;
+ 
+ 	duration = ieee80211_get_rate_duration(hw, &stat, &overhead);
++	if (!duration)
++		return 0;
+ 
+ 	/*
+ 	 * Assume that HT/VHT transmission on any AC except VO will
+@@ -830,13 +841,17 @@
+ 							      band, true, len);
+ 		duration /= 1024;
+ 
+-		return max_t(u32, duration, 4);
++		if (duration)
++			return max_t(u32, duration, 4);
++		/* Unknown rate (for example OFDMA RU): keep AQL accounting
++		 * conservative using the lowest basic rate below.
++		 */
+ 	}
+ 
+ 	if (!conf)
+ 		return 0;
+ 
+-	/* No station to get latest rate from, so calculate the worst-case
++	/* No station or usable latest rate, so calculate the worst-case
+ 	 * duration using the lowest configured basic rate.
+ 	 */
+ 	sband = hw->wiphy->bands[band];

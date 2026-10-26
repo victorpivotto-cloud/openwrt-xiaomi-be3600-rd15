@@ -5,12 +5,11 @@
  * IPQ5332 / AP-MI04.1-C2 (same reference board as GL.iNet GL-BE3600)
  * - 256 MiB DDR (U-Boot fixes /memory to 0x40000000+0x10000000); the
  *   reserved map below is the stock Xiaomi 1.0.87 one (Q6 256M profile).
- * - PPE port1 / 2.5G port is not enabled below. The stock DTB lists both
- *   QCA8081 at MDIO 0x0c and YT8821 at 0x07; this unit reported YT8821.
+ * - PPE port1 <- PCS0 <- QCA8081 2.5G PHY at MDIO 0x0c (the 2.5G port)
  *   PPE port2 <- PCS1 <- 2500base-x fixed link to a Motorcomm YT9215S
  *   switch with the three 1G ports (initialised by stock U-Boot).
- * - SPI NAND GD5F1GM7REYIG 128 MiB on QPIC, host ECC 8 bit / 512 B;
- *   partitions from SMEM (rootfs = mtd slot 0, rootfs_1 = slot 1).
+ * - SPI NAND GD5F1GM7REYIG 128 MiB on QPIC, host ECC 4 bit / 512 B as
+ *   stock; partitions from SMEM (rootfs = mtd slot 0, rootfs_1 = slot 1).
  * - Wi-Fi: integrated 2.4G (stock board_id 0x13) + QCN6432 5G (0x60).
  *
  * Facts derived from the stock 1.0.87 DTB and a running unit.
@@ -22,6 +21,7 @@
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
+#include <dt-bindings/pwm/pwm.h>
 #include <dt-bindings/clock/qcom,ipq5332-nsscc.h>
 
 / {
@@ -32,6 +32,10 @@
 
 	aliases {
 		serial0 = &blsp1_uart0;
+		led-boot = &led_status_orange;
+		led-failsafe = &led_status_orange;
+		led-running = &led_status_blue;
+		led-upgrade = &led_status_orange;
 	};
 
 	chosen {
@@ -40,6 +44,25 @@
 		 * the later root= wins. clk_ignore_unused as stock.
 		 */
 		bootargs-append = " ubi.block=0,ubi_rootfs root=/dev/ubiblock0_1 clk_ignore_unused";
+	};
+
+	leds {
+		compatible = "pwm-leds";
+
+		led_status_orange: led-0 {
+			label = "orange:status";
+			pwms = <&pwm 1 50000 0>;
+			max-brightness = <255>;
+			default-state = "on";
+			default-brightness = <72>;
+		};
+
+		led_status_blue: led-1 {
+			label = "blue:status";
+			pwms = <&pwm 2 50000 0>;
+			max-brightness = <255>;
+			default-state = "off";
+		};
 	};
 
 	reserved-memory {
@@ -161,7 +184,29 @@
 	status = "okay";
 };
 
+&pwm {
+	pinctrl-0 = <&status_led_pins>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
 &tlmm {
+	status_led_pins: status-led-state {
+		blue-pins {
+			pins = "gpio30";
+			function = "pwm2";
+			drive-strength = <8>;
+			bias-disable;
+		};
+
+		orange-pins {
+			pins = "gpio31";
+			function = "pwm1";
+			drive-strength = <8>;
+			bias-disable;
+		};
+	};
+
 	qspi_nand_pins: qspi_nand_pins {
 		qspi_clock {
 			pins = "gpio13";
@@ -212,11 +257,9 @@
 	reset-delay-us = <10000>;
 	reset-post-delay-us = <100000>;
 
-	/* The stock firmware selects QCA8081 if MDIO 0x0c is present, otherwise
-	 * YT8821. A prior stock-side read on this unit found YT8821 at 0x07
-	 * (id 0x4f51ea19), with no response at 0x0c. The 2.5G port is not
-	 * described yet, so its physical condition cannot be judged from this
-	 * OpenWrt build.
+	/* The MDIO bus also carries a Motorcomm YT8821 2.5G PHY at 0x07
+	 * (id 0x4f51ea19, read on stock); 0x0c is empty on this unit. Not
+	 * described yet: the 2.5G port is reported faulty and stays unused.
 	 * GPIO51 is the stock bus-wide PHY/switch reset. It idles as an input
 	 * with pull-down, i.e. the YT9215S stays in reset unless U-Boot brought
 	 * up its network (it does not on an autonomous bootmiwifi boot): the
@@ -294,9 +337,8 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		/* port@1 (2.5G) omitted. The first test targeted QCA8081 at 0x0c,
-		 * absent on this unit; PHY reset timed out and the PPE error path
-		 * then oopsed. A YT8821-specific test is still needed.
+		/* port@1 (QCA8081 2.5G at MDIO 0x0c) disabled: phy reset timed out
+		 * in the first test; the PPE error path then oopsed.
 		 */
 
 		/* Stock: port_id 2, forced-speed 2500 full duplex, to YT9215S */

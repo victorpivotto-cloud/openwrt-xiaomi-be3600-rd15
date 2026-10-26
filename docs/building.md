@@ -30,9 +30,9 @@ The pinned base is [`fivefold3/openwrt-gl-be3600`](https://github.com/fivefold3/
    ```
 
    Record hashes of any image actually used for a RAM boot or installation,
-   and keep images and hashes together in a private directory. Generating
-   `factory.ubi` and `sysupgrade.bin` does not make either a supported
-   installation path; see [limitations.md](limitations.md).
+   and keep images and hashes together in a private directory. The generated `factory.ubi` remains unqualified. A locally built RD15
+   sysupgrade is for an existing installation only, after the checks in
+   [upgrading.md](upgrading.md).
 
 `scripts/prepare-tree.sh` applies the patch to an exact base commit, then copies new files into the tree. Its `.config` is the tested *diffconfig*, not a full build cache. `make defconfig` expands it. Do not run `git add -A` inside a build tree after staging firmware or an SSH public key: both are local inputs, and built images contain proprietary firmware.
 
